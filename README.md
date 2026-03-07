@@ -6,14 +6,14 @@
 
 | 文档 | 说明 |
 |---|---|
-| [课前准备指南](docs/pre-setup.md) | 环境安装、GitHub 配置、仓库克隆 |
 | [整体教学计划](docs/overview.md) | 6 次课的大纲、教学策略、学员画像 |
 
-## Demo 项目
+### 第 1 课：全局地图 — 代码到底在哪里运行
 
-[demo/](demo/) 是课上演示用的聊天应用，包含前端（React）和后端（Express）。
-
-启动方式见 [demo/README.md](demo/README.md)。
+| 文档 | 说明 |
+|---|---|
+| [课前准备指南](lessons/lesson-1/pre-setup.md) | 环境安装、GitHub 配置、仓库克隆 |
+| [Demo 项目](lessons/lesson-1/demo/) | 教学用聊天应用（React 前端 + Express 后端） |
 
 ## 作业提交
 
