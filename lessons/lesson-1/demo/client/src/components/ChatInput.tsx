@@ -43,7 +43,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
         onClick={handleSubmit}
         disabled={disabled || !text.trim()}
       >
-        发送1
+        发送
       </button>
     </div>
   );
