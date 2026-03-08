@@ -49,21 +49,36 @@ app.get("/api/welcome", (_req, res) => {
  */
 app.post("/api/chat", (req, res) => {
   const { message } = req.body as { message: string };
+  console.log(`[服务器] 收到用户消息: "${message}"`);
 
-  // 参数校验：空消息返回 400
+  // ---------- 根据消息内容触发不同错误（课上演示用） ----------
+
+  // 输入"错误"或"error" → 500 服务器内部错误
+  if (message && (message.includes("错误") || message.toLowerCase().includes("error"))) {
+    console.log("[服务器] 触发 500 错误演示");
+    res.status(500).json({ error: "服务器内部错误", detail: "这是一个故意制造的错误！" });
+    return;
+  }
+
+  // 输入"超时"或"timeout" → 模拟请求超时（10秒不响应）
+  if (message && (message.includes("超时") || message.toLowerCase().includes("timeout"))) {
+    console.log("[服务器] 触发超时演示（10秒不响应）");
+    // 故意不调用 res，让前端一直等
+    return;
+  }
+
+  // 空消息或只有空格 → 400 参数错误
   if (!message || message.trim() === "") {
     console.log("[服务器] 收到空消息，返回 400 错误");
     res.status(400).json({ error: "消息不能为空" });
     return;
   }
 
-  console.log(`[服务器] 收到用户消息: "${message}"`);
+  // ---------- 正常流程 ----------
 
-  // 生成回复
   const reply = getReply(message);
   const now = new Date().toISOString();
 
-  // 存到聊天历史
   chatHistory.push({ role: "user", content: message, timestamp: now });
   chatHistory.push({ role: "assistant", content: reply, timestamp: now });
 
@@ -81,37 +96,6 @@ app.post("/api/chat", (req, res) => {
 app.get("/api/history", (_req, res) => {
   console.log(`[服务器] 返回聊天历史，共 ${chatHistory.length} 条消息`);
   res.json({ messages: chatHistory });
-});
-
-// ---------- 错误演示用 API（课上演示失败场景） ----------
-
-/**
- * GET /api/not-exist
- * 演示 404：这个路由故意不注册，访问时 Express 会返回 404
- * 课上在 Console 输入：fetch('/api/not-exist')
- */
-
-/**
- * GET /api/error
- * 演示 500：服务器内部报错
- * 课上在 Console 输入：fetch('/api/error')
- */
-app.get("/api/error", (_req, _res) => {
-  console.log("[服务器] 收到 error 请求，故意抛出异常");
-  throw new Error("这是一个故意制造的服务器错误！");
-});
-
-/**
- * POST /api/chat（空消息）
- * 演示 400：参数校验失败
- * 课上在 Console 输入：fetch('/api/chat', {method:'POST', headers:{'Content-Type':'application/json'}, body:'{}'})
- */
-
-// ---------- 错误处理（让 500 返回 JSON） ----------
-
-app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  console.error("[服务器] 发生错误:", err.message);
-  res.status(500).json({ error: "服务器内部错误", detail: err.message });
 });
 
 // ---------- 启动服务器 ----------
