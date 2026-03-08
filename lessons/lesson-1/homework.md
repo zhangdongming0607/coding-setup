@@ -43,3 +43,5 @@
 2. 点页面顶部的黄色提示条 **"Compare & pull request"**
 3. 标题写 `第 1 课作业 - 你的名字`
 4. 点 **Create pull request**
+
+注意：提完 PR 就行了，不要点那个绿色的 **Merge pull request** 按钮，等老师review。

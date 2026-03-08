@@ -72,6 +72,8 @@
 4. 标题写 `第 1 课作业 - 你的名字`
 5. 点 **Create pull request**
 
+注意：提完 PR 就行了，不要点那个绿色的 **Merge pull request** 按钮，等老师review。
+
 ## 七、Vibe Coding 小贴士
 
 **多提交 = 多存档。**
