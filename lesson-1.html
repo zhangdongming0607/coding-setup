@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第 1 课：全局地图 — 代码到底在哪里运行</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav>
+    <a href="index.html">&larr; 课程首页</a>
+    <a href="lesson-2.html">下一课 &rarr;</a>
+  </nav>
+
+  <div class="container">
+    <h1>第 1 课：全局地图 — 代码到底在哪里运行</h1>
+
+    <p class="lesson-goal">目标：建立"一个网页从输入 URL 到展示内容"的完整心智模型，能分清前端/后端/配置文件的职责，并学会用 DevTools 验证自己的理解。</p>
+
+    <a href="https://stackblitz.com/github/zhangdongming0607/coding-setup/tree/main/lessons/lesson-1/demo/client" target="_blank" class="stackblitz-btn">在浏览器中打开 Demo 项目</a>
+
+    <h2>课前准备</h2>
+
+    <div class="task-list">
+      <ul>
+        <li>安装 Chrome 浏览器</li>
+        <li>安装 VS Code</li>
+        <li>安装 Node.js（LTS 版本）</li>
+        <li>安装 Git</li>
+        <li>把 Demo 项目 clone 到本地、跑起来</li>
+      </ul>
+    </div>
+
+    <hr>
+
+    <!-- 0:00-0:05 开场 -->
+    <h2><span class="timeline">0:00-0:05</span> 开场：这门课要解决什么问题</h2>
+
+    <blockquote>
+      <p>先说一下这门课的定位——我们不是要把你们变成程序员。你们已经在用 AI 写代码了，也跑通过一些项目。这系列课要解决的是一个问题：<strong>AI 写的那些代码，到底在干嘛？</strong></p>
+      <p>今天是第一课，我们从最宏观的视角开始。你在浏览器里输入一个网址、按下回车，到页面出现——这中间到底发生了什么？弄清楚这件事，后面你再看 AI 生成的任何代码，都能知道它属于哪个环节。</p>
+    </blockquote>
+
+    <p>打开浏览器，访问 Demo 项目的本地地址（<code>localhost:5173</code>），你会看到一个简单的聊天页面。在输入框里打一句"你好"，点发送，等一会儿就能收到回复。</p>
+
+    <p>就这么简单——一个聊天页面，你发消息，它回消息。但这背后其实有两个程序在配合：一个跑在浏览器里画页面，一个跑在你电脑上处理消息。接下来我们打开"引擎盖"看看里面怎么转的。</p>
+
+    <hr>
+
+    <!-- 0:05-0:12 请求链路 -->
+    <h2><span class="timeline">0:05-0:12</span> 请求链路：从 URL 到页面</h2>
+
+    <blockquote>
+      <p>我用最简单的类比来说。你在浏览器里输入一个地址，就像你在餐厅里下单。</p>
+    </blockquote>
+
+    <ol>
+      <li><strong>你说了一个名字</strong>（URL）——"我要去 xxx.com"</li>
+      <li><strong>服务员查座位表</strong>（DNS）—— 把名字翻译成一个具体的地址（IP 地址），你不需要记 IP，记名字就行</li>
+      <li><strong>厨房收到订单</strong>（服务器）—— 服务器接到请求，决定返回什么内容</li>
+      <li><strong>菜端上来</strong>（HTML/CSS/JS）—— 浏览器收到一堆文件，开始"摆盘"——把页面画出来</li>
+      <li><strong>你吃的过程中还要加菜</strong>（API 请求）—— 页面加载后，JS 代码会再发请求去拿数据，比如用户信息、列表数据</li>
+    </ol>
+
+    <h3>动手验证</h3>
+
+    <ol>
+      <li>按 <code>Cmd+Option+I</code>（Mac）或 <code>F12</code>（Windows）打开 DevTools，切到 <strong>Network</strong> 面板</li>
+      <li>在聊天框发一条消息，观察 Network 面板中新出现的 <code>chat</code> 请求——这就是前端和后端通信的过程</li>
+      <li>刷新页面，观察瀑布流中的几类请求：
+        <ul>
+          <li><strong>第一个请求</strong>（document 类型）：浏览器去找服务器要页面——"下单"</li>
+          <li><strong>JS/CSS 文件</strong>：页面要长什么样、要有什么功能，都写在这些文件里——"配料"</li>
+          <li><strong>XHR/Fetch 请求</strong>（API 调用）：页面画出来之后，代码又去服务器拿具体的数据——"加菜"</li>
+        </ul>
+      </li>
+      <li>点击一个 API 请求，展开看 Response 里的 JSON 数据——这就是服务器返回的原始数据，前端拿到后渲染成页面</li>
+    </ol>
+
+    <blockquote>
+      <p>记住这个模型：<strong>浏览器 &rarr; 服务器 &rarr; 浏览器</strong>。今天看到的所有东西，都在这个往返里面。</p>
+    </blockquote>
+
+    <hr>
+
+    <!-- 0:12-0:22 前端和后端 -->
+    <h2><span class="timeline">0:12-0:22</span> 前端和后端：谁在干什么</h2>
+
+    <blockquote>
+      <p>从写代码的视角来看：</p>
+      <ul>
+        <li><strong>前端代码</strong>：跑在浏览器里的代码。负责"页面长什么样"和"用户点了按钮之后做什么"</li>
+        <li><strong>后端代码</strong>：跑在服务器上的代码。负责"数据存在哪"和"业务逻辑怎么算"</li>
+        <li><strong>配置文件</strong>：不跑在任何地方，是告诉工具"怎么打包/怎么启动/怎么部署"的说明书</li>
+      </ul>
+    </blockquote>
+
+    <h3>Demo 项目文件结构</h3>
+
+    <div class="file-tree">
+<pre>
+lesson-demo/
+├── client/                         &larr; 前端代码——跑在浏览器里
+│   ├── index.html                  &larr; HTML 入口——浏览器最先拿到的文件
+│   ├── src/
+│   │   ├── main.tsx                &larr; 启动文件——整个前端从这里开始跑
+│   │   ├── App.tsx                 &larr; 根组件——管理消息列表，是所有组件的"大门"
+│   │   ├── api.ts                  &larr; 调后端的函数——前端通过这里跟后端通信
+│   │   ├── styles.css              &larr; 样式——页面长什么样全写在这里
+│   │   └── components/
+│   │       ├── ChatWindow.tsx      &larr; 聊天窗口——显示所有消息
+│   │       ├── MessageBubble.tsx   &larr; 消息气泡——一条消息长什么样
+│   │       └── ChatInput.tsx       &larr; 输入框——用户打字和发送的地方
+│   ├── package.json                &larr; 配置——前端用了哪些第三方库
+│   ├── tsconfig.json               &larr; 配置——TypeScript 的设置
+│   └── vite.config.ts              &larr; 配置——打包工具的设置（含代理转发到后端）
+│
+├── server/                         &larr; 后端代码——跑在你的电脑上（服务器）
+│   ├── index.ts                    &larr; 服务器入口——接收请求、返回数据
+│   ├── replies.ts                  &larr; 回复数据——模拟 AI 的回复内容
+│   ├── package.json                &larr; 配置——后端用了哪些第三方库
+│   └── tsconfig.json               &larr; 配置——TypeScript 的设置
+│
+└── README.md                       &larr; 说明书——项目介绍和启动方法
+</pre>
+    </div>
+
+    <blockquote>
+      <p>注意看——client 和 server 两个文件夹各有自己的 <code>package.json</code>，因为它们是两个独立的程序。前端跑在浏览器里，后端跑在你的电脑上，它们通过 API 请求互相通信。</p>
+    </blockquote>
+
+    <h3>关键文件解读</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>文件</th>
+          <th>类型</th>
+          <th>作用</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>client/src/App.tsx</code></td>
+          <td>前端</td>
+          <td>描述页面长什么样、消息列表怎么渲染</td>
+        </tr>
+        <tr>
+          <td><code>client/src/api.ts</code></td>
+          <td>前端</td>
+          <td>前端和后端的"桥梁"——用 fetch 函数给后端发请求</td>
+        </tr>
+        <tr>
+          <td><code>server/index.ts</code></td>
+          <td>后端</td>
+          <td>接收请求、返回数据，但不管页面长什么样</td>
+        </tr>
+        <tr>
+          <td><code>vite.config.ts</code></td>
+          <td>配置</td>
+          <td>告诉打包工具怎么运行项目</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <blockquote>
+      <p>以后你看 AI 生成的任何文件，第一件事就是判断：<strong>这个文件是给浏览器跑的，还是给服务器跑的？</strong> 这决定了你应该怎么看它、怎么调试它。</p>
+    </blockquote>
+
+    <hr>
+
+    <!-- 0:22-0:27 DevTools 三板斧 -->
+    <h2><span class="timeline">0:22-0:27</span> DevTools 三板斧</h2>
+
+    <blockquote>
+      <p>Chrome DevTools 是前端开发者最重要的工具，没有之一。你不需要全学，记住三个面板就够应付 80% 的场景。</p>
+    </blockquote>
+
+    <h3>1. Elements 面板</h3>
+    <ul>
+      <li>右键页面上一个元素 &rarr; "检查"，可以看到页面的 HTML 结构</li>
+      <li>鼠标移上去，页面上对应的部分会高亮</li>
+      <li>可以直接改样式试试效果——比如改个颜色，页面立刻变化</li>
+      <li>注意：这里改了不会保存到代码里，刷新就没了。但它特别适合"试一下效果"</li>
+    </ul>
+
+    <h3>2. Network 面板</h3>
+    <ul>
+      <li>核心就一件事：<strong>你的页面发了几个请求、每个请求成功没有、返回了什么数据</strong></li>
+      <li>失败的请求会显示为红色</li>
+    </ul>
+
+    <p>HTTP 状态码速记：</p>
+    <table>
+      <thead>
+        <tr>
+          <th>状态码开头</th>
+          <th>含义</th>
+          <th>说明</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>2xx</strong></td>
+          <td>成功</td>
+          <td>请求正常完成</td>
+        </tr>
+        <tr>
+          <td><strong>4xx</strong></td>
+          <td>你的问题</td>
+          <td>请求本身有问题（比如地址写错了、参数缺了）</td>
+        </tr>
+        <tr>
+          <td><strong>5xx</strong></td>
+          <td>服务器的问题</td>
+          <td>服务器自己出了错</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <blockquote>
+      <p>以后页面出问题，第一反应不是看代码，而是打开 Network 看看请求有没有失败。</p>
+    </blockquote>
+
+    <h3>3. Console 面板</h3>
+    <ul>
+      <li>这里会显示代码的报错信息。如果你的页面白屏了，来这里看看有没有红色错误</li>
+      <li>报错信息一般这么读——先看最后一行，它告诉你哪个文件出了问题；再看红色的那一行，它告诉你错在哪</li>
+      <li>代码里写 <code>console.log('hello')</code>，输出就会出现在这里，这是最简单的调试方式</li>
+    </ul>
+
+    <hr>
+
+    <!-- 0:27-0:35 LLM 知识点 -->
+    <h2><span class="timeline">0:27-0:35</span> AI 是怎么生成代码的</h2>
+
+    <blockquote>
+      <p>你们天天在用 AI 写代码，但你们有没有想过，AI 到底是怎么"写"出来的？</p>
+    </blockquote>
+
+    <h3>实验一：观察生成过程</h3>
+    <p>打开任意 AI 工具，输入提示词：</p>
+    <pre><code>用 JavaScript 写一个函数，判断一个字符串是不是回文</code></pre>
+    <p>观察回答是一个字一个字蹦出来的，不是一整段一起出现的。这不是为了动画效果，它<strong>真的是</strong>在一个一个生成。</p>
+
+    <blockquote>
+      <p>AI 做的事情本质上跟输入法联想一样：你打了"今天天气"，输入法提示"很好"。AI 就是一个超级强的联想机器——看到你的问题，然后一个词一个词地预测"下一个最可能出现的词是什么"，直到生成完整的回答。</p>
+    </blockquote>
+
+    <h3>实验二：同样的问题，再问一遍</h3>
+    <p>把一模一样的提示词再发一次，你会发现写法变了——变量名不一样、实现方式可能也不一样。因为每次预测都有随机性——就像骰子，每次扔结果都不同。</p>
+
+    <h3>实验三：AI 也会犯错</h3>
+    <p>试试输入这个提示词：</p>
+    <pre><code>用 Express 写一个接口，用 req.getBody() 获取请求体</code></pre>
+    <p>注意：Express 里<strong>没有</strong> <code>req.getBody()</code> 这个方法。观察 AI 是否会照写不存在的方法——这叫<strong>幻觉（hallucination）</strong>，AI 会一本正经地编造东西。</p>
+
+    <blockquote>
+      <p>这就是为什么我们要学 DevTools——<strong>AI 是你的助手，但 DevTools 是帮你验证它有没有说谎的工具</strong>。它说"这个接口会返回数据"，你打开 Network 看一眼就知道了。</p>
+    </blockquote>
+
+    <hr>
+
+    <!-- 0:35-0:45 动手环节 -->
+    <h2><span class="timeline">0:35-0:45</span> 动手环节</h2>
+
+    <blockquote>
+      <p>现在轮到你们了。打开你自己之前做过的 vibe coding 项目（或者我们的 Demo 项目），完成下面的任务。遇到卡住的地方随时问。</p>
+    </blockquote>
+
+    <div class="task-list">
+      <h3>任务清单</h3>
+      <ul>
+        <li><strong>任务 1</strong>：打开 Chrome DevTools &rarr; Network 面板 &rarr; 刷新页面。数一下你的页面一共发了几个网络请求？截图记录。</li>
+        <li><strong>任务 2</strong>：找到一个 XHR 或 Fetch 类型的请求（就是 API 调用），点开它，看 Response 标签页。这个接口返回了什么数据？用一句话描述。</li>
+        <li><strong>任务 3</strong>：打开 VS Code，看你项目的文件树。找出 3 个前端文件和 1 个配置文件，说说它们分别是干嘛的。（如果有后端文件也找出来）</li>
+        <li><strong>任务 4（加分）</strong>：打开 Console 面板，看看有没有报错信息。如果有，把报错信息复制出来，一起看看是什么意思。</li>
+      </ul>
+    </div>
+
+    <p><strong>常见问题</strong>：</p>
+    <ul>
+      <li><strong>DevTools 找不到</strong>：用 <code>Cmd+Option+I</code>（Mac）或 <code>F12</code>（Windows）打开</li>
+      <li><strong>Network 面板什么都没有</strong>：需要刷新页面才能看到请求</li>
+      <li><strong>不知道哪个是 API 请求</strong>：用面板上的 "Fetch/XHR" 过滤按钮</li>
+    </ul>
+
+    <hr>
+
+    <!-- 0:45-0:50 Git 最小流程 -->
+    <h2><span class="timeline">0:45-0:50</span> Git 最小流程（预热）</h2>
+
+    <blockquote>
+      <p>接下来每次课的作业都要用 Git 来交。Git 是什么、为什么需要它，我们下节课详细讲。今天只教你们三个命令，能把作业提交上去就行。</p>
+    </blockquote>
+
+    <pre><code># 1. 进入课程仓库目录
+cd coding-setup
+
+# 2. 告诉 Git "我要存哪些文件"
+git add .
+
+# 3. 存一个版本，附一句说明
+git commit -m "第一次作业"
+
+# 4. 推到 GitHub 上
+git push</code></pre>
+
+    <blockquote>
+      <p>就这三步。<code>add</code> 是"把文件放到待归档区"，<code>commit</code> 是"正式归档并贴标签"，<code>push</code> 是"把归档好的东西传到 GitHub 上"。</p>
+      <p>下节课我们会详细讲 Git 的原理和更多操作，今天先会这三步就够了。</p>
+    </blockquote>
+
+    <hr>
+
+    <!-- 作业 -->
+    <h2>课后作业</h2>
+
+    <div class="task-list">
+      <h3>第 1 课作业：画一张"项目地图"</h3>
+      <ol>
+        <li>打开你自己做的 vibe coding 项目（或 Demo 项目）</li>
+        <li>列出所有重要的文件/文件夹</li>
+        <li>每个文件用一句话说明它的作用</li>
+        <li>标注哪些是"前端文件"、哪些是"后端文件"、哪些是"配置文件"</li>
+      </ol>
+      <p>格式不限——可以用文本列表、可以手绘拍照、可以用任何你顺手的工具。</p>
+      <p><strong>提交方式</strong>：在课程仓库里创建一个以你名字命名的文件夹，把作业文件放进去，用 <code>git add</code> / <code>commit</code> / <code>push</code> 提交。</p>
+    </div>
+
+    <hr>
+
+    <!-- 下节预告 -->
+    <h2>下节预告</h2>
+
+    <blockquote>
+      <p>下节课我们讲 <strong>Git——代码的存档与协作</strong>。为什么需要它、怎么用它管理代码版本、改崩了怎么回退。从下节课开始，所有作业都通过 Git 提交。</p>
+    </blockquote>
+
+    <hr>
+
+    <h2>本课要点回顾</h2>
+    <ol>
+      <li><strong>请求链路</strong>：浏览器 &rarr; 服务器 &rarr; 浏览器，所有内容围绕这个往返展开</li>
+      <li><strong>前端 vs 后端</strong>：前端跑在浏览器里管页面，后端跑在服务器上管数据，配置文件是工具的说明书</li>
+      <li><strong>DevTools 三板斧</strong>：Elements 看结构、Network 看请求、Console 看报错</li>
+    </ol>
+
+    <nav>
+      <a href="index.html">&larr; 课程首页</a>
+      <a href="lesson-2.html">下一课 &rarr;</a>
+    </nav>
+  </div>
+</body>
+</html>
