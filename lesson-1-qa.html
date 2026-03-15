@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第 1 课 Q&A — 同学们的灵魂拷问</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+
+<nav class="nav">
+  <a href="index.html" class="nav-back">&larr; 课程首页</a>
+</nav>
+
+<h1>第 1 课 Q&amp;A</h1>
+<p class="subtitle">来自同学们作业里的灵魂拷问</p>
+
+<!-- Q1 -->
+<div class="card">
+<h2 style="margin-top: 0;">Q1：浏览器插件里，能不能在网页上直接请求外部 API？</h2>
+
+<p>能写，<code>fetch('https://api.notion.com/...')</code> 一行就写完了。但跑起来你会发现——请求直接失败，连 Notion 服务器的门都没摸到。</p>
+
+<h3>为什么？</h3>
+
+<p>content.js 是你的代码没错，但它跑在别人的网页里。浏览器不管你代码是谁写的，它只认地盘：你在知乎的页面上发请求，浏览器就认为你是知乎。</p>
+
+<p>然后浏览器去问 Notion："知乎找你要数据，你认识吗？"Notion 说："不认识。"浏览器说："那不好意思，拦了。"</p>
+
+<p>这个机制叫 CORS。你可以理解成浏览器是个<strong>保安</strong>，死板但尽职——你站在知乎的地盘上，就只能算知乎的人。不管你掏出什么工牌、喊什么口号，保安只看你脚下踩的是谁的地。</p>
+
+<p>请求压根没到 Notion 的服务器，保安在门口就给你挡回去了。</p>
+
+<img src="images/cors-explain.jpeg" alt="CORS 机制示意图" style="width: 100%; border-radius: 8px; margin-bottom: 16px;">
+
+<h3>那 background.js 为什么能过？</h3>
+
+<p>因为 background.js 不站在任何网页的地盘上——它跑在插件自己的空间里。而且用户安装插件的时候，Chrome 弹了个窗："这个插件想访问 api.notion.com，你同意吗？"用户点了同意，相当于给 background.js 办了一张<strong>通行证</strong>。</p>
+
+<p>保安看到这张通行证：行，过吧。</p>
+
+<p>所以 content.js 负责在别人家里干活（划词、弹浮层），遇到要跟外面联系的事情，就发个消息给 background.js："帮我把这段话存到 Notion。"background.js 拿着通行证去请求，拿到结果再传回来。</p>
+
+<h3>那是不是有通行证就安全了？</h3>
+
+<p>不是。通行证是用户自己发的，发了就真的有效。</p>
+
+<p>这个插件通行证上写的是"只能去 Notion"——合理。但如果一个插件通行证上写的是"哪儿都能去"（<code>&lt;all_urls&gt;</code>），那它就真的哪儿都能去——你在任何网页上看的东西、输入的内容，它理论上都能偷偷读到、发到别的地方。</p>
+
+<p>所以 Chrome 每次安装插件都用大字提醒你"此扩展可以读取和更改你在<strong>所有网站</strong>上的数据"——翻译成人话就是：<strong>你确定你信得过它吗？信得过就装，出了事算你自己的。</strong></p>
+
+<blockquote>
+<p>三句话总结：</p>
+<ul>
+<li>网页里请求外部 API &rarr; 保安拦住，不让过</li>
+<li>background.js 请求 &rarr; 有通行证，保安放行</li>
+<li>通行证是你自己发的 &rarr; 别给来路不明的插件发通行证</li>
+</ul>
+</blockquote>
+</div>
+
+<!-- Q2 -->
+<div class="card">
+<h2 style="margin-top: 0;">Q2：代码里那些大括号小括号都是什么意思？</h2>
+
+<p>代码里各种括号确实容易晕，其实就四种：</p>
+
+<table>
+<tr><th>符号</th><th>干什么的</th><th>例子</th></tr>
+<tr>
+  <td><code>()</code></td>
+  <td><strong>调用函数</strong>，或者传参数</td>
+  <td><code>console.log("你好")</code> &mdash; 调用 log 函数，传了一句话进去</td>
+</tr>
+<tr>
+  <td><code>{}</code></td>
+  <td><strong>包一段代码</strong>，或者表示一个数据包（对象）</td>
+  <td><code>if (x) { ... }</code> &mdash; 条件成立就执行花括号里的代码</td>
+</tr>
+<tr>
+  <td><code>[]</code></td>
+  <td><strong>列表</strong>（数组），放一堆东西</td>
+  <td><code>['标签', 'Tags', 'tags']</code> &mdash; 装了三个名字的列表</td>
+</tr>
+<tr>
+  <td><code>=&gt;</code></td>
+  <td><strong>箭头函数</strong>，定义函数的简写</td>
+  <td><code>(text) =&gt; { ... }</code> &mdash; 收到 text，执行后面的代码</td>
+</tr>
+</table>
+
+<p>不用死记，看多了自然就认识了。就像你刚学英语的时候分不清各种标点，看多了自然知道句号和逗号的区别。</p>
+</div>
+
+<!-- Q3 -->
+<div class="card">
+<h2 style="margin-top: 0;">Q3：代码里花花绿绿的颜色是什么？</h2>
+
+<p>那些颜色是编辑器（VS Code）自动加的，叫<strong>语法高亮</strong>。不同颜色代表不同角色：</p>
+
+<ul>
+<li><strong>紫色</strong> &mdash; 关键字，语言自带的指令词，比如 <code>import</code>、<code>const</code>、<code>function</code></li>
+<li><strong>蓝色</strong> &mdash; 变量名 / 函数名，你自己起的名字或者别人定义的名字</li>
+<li><strong>橙色/黄色</strong> &mdash; 字符串，引号包起来的文字内容</li>
+<li><strong>绿色</strong> &mdash; 注释，给人看的说明，代码运行时直接跳过</li>
+</ul>
+
+<p>这些颜色<strong>不影响代码运行</strong>，纯粹是视觉辅助。就像课本里用不同颜色标注标题、正文、注释一样，帮你一眼扫出每个词是什么角色。换个编辑器主题，颜色就全变了，但代码还是一样的。</p>
+</div>
+
+<p class="footer">编程入门课程 &copy; 2026</p>
+</div>
+</body>
+</html>
