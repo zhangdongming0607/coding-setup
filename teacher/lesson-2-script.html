@@ -160,6 +160,35 @@ const [loading, setLoading] = useState(false);</code></pre>
 
 <p>另外注意写法：<code>useState</code> 返回的是一对东西——<strong>当前值</strong>和<strong>修改函数</strong>。<code>messages</code> 是当前值，<code>setMessages</code> 是用来改它的函数。想改白板上的内容，必须用 <code>set</code> 开头的那个函数，不能直接改。</p>
 
+<p>但为什么不能用普通变量呢？比如直接写 <code>let messages = []</code>，往里面 push 不也行吗？</p>
+
+<p>我们拿项目里发消息的代码来对比一下：</p>
+
+<pre><code>// ❌ 假如用普通变量
+let messages = [];
+
+const handleSend = async (text: string) =&gt; {
+  messages.push({ role: "user", content: text, ... });
+  // messages 确实变了——但页面上什么都没发生
+  // 你打了字，点了发送，聊天窗口还是空的
+};</code></pre>
+
+<pre><code>// ✅ 项目里实际的写法
+const [messages, setMessages] = useState&lt;Message[]&gt;([]);
+
+const handleSend = async (text: string) =&gt; {
+  setMessages((prev) =&gt; [...prev, userMsg]);
+  // 页面立刻多了一条消息气泡
+};</code></pre>
+
+<p>区别就一件事：<code>useState</code> 的 set 函数是一个<strong>变更通知机制</strong>。你调 <code>setMessages()</code>，相当于告诉 React："数据变了，请重新画页面。"普通变量没有这个通知能力——数据改了，React 根本不知道，页面就纹丝不动。</p>
+
+<p>再看 <code>loading</code> 更直观——<code>setLoading(true)</code> 的时候发送按钮变灰、出现加载动画；<code>setLoading(false)</code> 按钮恢复。如果用 <code>let loading = true</code>，按钮永远不会变。</p>
+
+<blockquote>
+  <p>所以 <code>useState</code> 的本质就是：<strong>你跟 React 之间的通信通道。通过 set 函数通知 React 数据变了，React 才会更新页面。</strong></p>
+</blockquote>
+
 <h4>useEffect</h4>
 
 <p>接下来看这一段：</p>
