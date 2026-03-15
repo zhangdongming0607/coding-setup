@@ -15,132 +15,224 @@
 </nav>
 
 <h1>第 2 课：读代码 — 看懂 AI 写了什么</h1>
-<p class="subtitle">掌握"读代码"的基本方法——找到入口、顺着数据流走，从入口文件一路追踪到页面渲染。</p>
+<p class="subtitle">掌握读代码的核心方法——找到入口、顺着数据流走，从入口文件一路追踪到页面渲染。</p>
 
-<a href="https://stackblitz.com/github/zhangdongming0607/coding-setup/tree/main/lessons/lesson-1/demo/client" target="_blank" class="stackblitz-btn">在浏览器中打开 Demo 项目</a>
+<a href="https://stackblitz.com/github/zhangdongming0607/coding-setup/tree/main/lessons/lesson-1/demo/client" target="_blank" class="stackblitz-btn">在浏览器中打开 Demo</a>
 
-<!-- 开场 & 回顾 -->
-<h2><span class="timeline">0:00-0:05</span> 开场 &amp; 回顾</h2>
+<!-- 2.1 -->
+<h2>2.1 读代码的方法：找入口，顺着数据流走</h2>
 
-<blockquote>
-  <p>上节课我们建立了一个全局地图——浏览器发请求、服务器返数据、浏览器画页面。你们也学会了用 DevTools 看网络请求和页面结构。</p>
-  <p>今天我们要打开代码文件，真正去<strong>读</strong>它。为什么？因为你们用 AI 生成代码之后，遇到最多的情况是：<strong>跑起来了但不知道它在干嘛，出了问题不知道从哪里找。</strong></p>
-  <p>读代码的目标不是逐行理解每个字母，而是能<strong>定位</strong>——知道问题出在哪个文件、哪个环节。今天教的方法就一个：<strong>找入口，顺着数据流走。</strong></p>
-</blockquote>
+<p>用 AI 生成代码之后，你最常遇到的情况大概是：<strong>跑起来了，但不知道它在干嘛；出了问题，不知道从哪里找</strong>。</p>
 
-<!-- 方法论 -->
-<h2><span class="timeline">0:05-0:15</span> 方法论：找入口，顺着数据流走</h2>
+<p>读代码的目标不是逐行理解每个字母，而是能<strong>定位</strong>——知道问题出在哪个文件、哪个环节。方法很简单，就两步：</p>
 
-<blockquote>
-  <p>读代码跟读一本书不一样。一本书从第一页开始翻就行了。但代码不是线性的——几十个文件摆在你面前，从哪个开始？</p>
-  <p>方法很简单，两步：</p>
-  <p><strong>第一步：找入口。</strong> 每个程序都有一个"第一行被执行的代码"，这就是入口。找到它，你就有了起点。</p>
-  <p><strong>第二步：顺着数据流走。</strong> 从入口开始，追踪数据是怎么流动的——用户操作产生了什么数据？数据传给了谁？最终怎么变成了页面上的内容？</p>
-  <p>这两步适用于任何项目，不管是 React、Vue、还是后端代码。</p>
-</blockquote>
+<ol>
+  <li><strong>找入口。</strong> 每个程序都有一个"第一行被执行的代码"，这就是入口。找到它，你就有了起点。</li>
+  <li><strong>顺着数据流走。</strong> 从入口开始，追踪数据是怎么流动的——用户操作产生了什么数据？数据传给了谁？最终怎么变成了页面上的内容？</li>
+</ol>
 
-<p>数据流的基本模型：</p>
+<p>这两步适用于任何项目，不管是 React、Vue 还是后端代码。</p>
+
+<p>数据流的基本模型长这样：</p>
 
 <pre>用户操作 → 事件处理函数 → 修改数据（状态）→ 页面更新
             ↘ 发请求给后端 → 后端返回数据 ↗</pre>
 
-<blockquote>
-  <p>你读代码的时候，就是在这条线上找你关心的那个环节。</p>
-</blockquote>
+<p>你读代码的时候，就是在这条线上找你关心的那个环节。接下来我们用上节课的 Demo 项目，实际走一遍。</p>
 
-<!-- 实战：跟我读一遍 Demo 项目 -->
-<h2><span class="timeline">0:15-0:35</span> 实战：跟我读一遍 Demo 项目</h2>
+<!-- 2.2 -->
+<h2>2.2 第一步：找入口文件</h2>
 
-<h3><span class="timeline">0:15-0:20</span> 第一步：找入口</h3>
+<p>打开 Demo 项目的前端代码（<code>client/src/</code> 文件夹），你会看到好几个文件。从哪个开始看？</p>
 
-<blockquote>
-  <p>打开 VS Code，看 Demo 项目的前端代码（<code>client/src/</code> 文件夹）。文件不多，但从哪个开始看？</p>
-  <p>记住规律：<strong>前端项目的入口，通常叫 <code>main</code>、<code>index</code>、或 <code>app</code></strong>。我们找一找——<code>main.tsx</code>，就是它。</p>
-</blockquote>
+<p>记住一个规律：<strong>前端项目的入口通常叫 <code>main</code>、<code>index</code> 或 <code>app</code></strong>。在这个项目里，入口就是 <code>main.tsx</code>。</p>
 
 <p>打开 <code>client/src/main.tsx</code>：</p>
 
-<pre><code>import { createRoot } from "react-dom/client";
+<pre><code>/**
+ * 前端启动文件 — 整个前端从这里开始
+ *
+ * 它做的事情很简单：把 App 组件渲染到 HTML 里的 #root 元素中
+ */
+
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
 import { App } from "./App";
+import "./styles.css";
 
 createRoot(document.getElementById("root")!).render(
-  &lt;App /&gt;
+  &lt;StrictMode&gt;
+    &lt;App /&gt;
+  &lt;/StrictMode&gt;
 );</code></pre>
 
-<blockquote>
-  <p>这个文件就三件事：</p>
-  <ol>
-    <li>在 HTML 里找到一个叫 <code>root</code> 的容器</li>
-    <li>把 <code>App</code> 这个组件塞进去</li>
-    <li>页面就出来了</li>
-  </ol>
-  <p>现在我们知道了——<strong>所有的内容都从 <code>App</code> 开始</strong>。所以下一步，去看 <code>App</code>。</p>
-</blockquote>
+<p>这个文件就做了三件事：</p>
+
+<ol>
+  <li>在 HTML 里找到一个叫 <code>root</code> 的容器</li>
+  <li>把 <code>App</code> 这个组件塞进去</li>
+  <li>页面就出来了</li>
+</ol>
+
+<p>所以现在你知道了——<strong>所有的内容都从 <code>App</code> 开始</strong>。下一步，去看 <code>App</code>。</p>
 
 <h4>关键概念</h4>
 <ul>
-  <li><strong><code>import</code></strong>：这行代码的意思是"从别的文件里拿东西来用"。就像你在文档里说"参见附件 A"——代码用 import 来引用其他文件里的功能。</li>
+  <li><strong><code>import</code></strong>：意思是"从别的文件里拿东西来用"。就像你在文档里说"参见附件 A"——代码用 import 来引用其他文件里的功能。</li>
   <li><strong>组件（Component）</strong>：<code>&lt;App /&gt;</code> 看起来像 HTML 标签，但它其实是我们自己写的一个组件。你可以把组件理解为一个<strong>可复用的页面零件</strong>——按钮是一个零件，输入框是一个零件，整个聊天窗口也是一个零件。</li>
 </ul>
 
-<h3><span class="timeline">0:20-0:28</span> 第二步：读根组件</h3>
+<!-- 2.3 -->
+<h2>2.3 第二步：读根组件 App</h2>
 
-<p>打开 <code>client/src/App.tsx</code>，分块来看：</p>
+<p>打开 <code>client/src/App.tsx</code>，我们分块来看。下面是这个文件的完整代码：</p>
 
-<h4>（1）状态声明部分</h4>
+<pre><code>/**
+ * App — 根组件，管理整个页面的状态和布局
+ */
+
+import { useEffect, useState } from "react";
+import { ChatWindow } from "./components/ChatWindow";
+import { ChatInput } from "./components/ChatInput";
+import { fetchWelcome, sendMessage } from "./api";
+import type { Message } from "./api";
+
+export function App() {
+  // 消息列表（状态）——每次更新，页面会自动重新渲染
+  const [messages, setMessages] = useState&lt;Message[]&gt;([]);
+  // 是否正在等待回复
+  const [loading, setLoading] = useState(false);
+
+  // 页面首次加载时，获取欢迎消息
+  useEffect(() =&gt; {
+    fetchWelcome().then((welcomeText) =&gt; {
+      setMessages([
+        {
+          role: "assistant",
+          content: welcomeText,
+          timestamp: new Date().toISOString(),
+        },
+      ]);
+    });
+  }, []);
+
+  // 用户发送消息
+  const handleSend = async (text: string) =&gt; {
+    // 1. 先把用户消息加到列表里
+    const userMsg: Message = {
+      role: "user",
+      content: text,
+      timestamp: new Date().toISOString(),
+    };
+    setMessages((prev) =&gt; [...prev, userMsg]);
+    setLoading(true);
+
+    try {
+      // 2. 发请求给后端，等回复
+      const { reply, timestamp } = await sendMessage(text);
+
+      // 3. 把回复加到列表里
+      const assistantMsg: Message = {
+        role: "assistant",
+        content: reply,
+        timestamp,
+      };
+      setMessages((prev) =&gt; [...prev, assistantMsg]);
+    } catch (err) {
+      // 请求失败时，把错误信息显示在聊天里
+      const errorMsg: Message = {
+        role: "assistant",
+        content: `⚠️ ${err instanceof Error ? err.message : "请求失败"}`,
+        timestamp: new Date().toISOString(),
+      };
+      setMessages((prev) =&gt; [...prev, errorMsg]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    &lt;div className="app"&gt;
+      &lt;header className="app-header"&gt;
+        &lt;h1&gt;Demo 聊天助手&lt;/h1&gt;
+      &lt;/header&gt;
+      &lt;ChatWindow messages={messages} loading={loading} /&gt;
+      &lt;ChatInput onSend={handleSend} disabled={loading} /&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+
+<p>代码不短，不用怕。我们一块一块看。</p>
+
+<h3>（1）状态声明</h3>
 
 <pre><code>const [messages, setMessages] = useState&lt;Message[]&gt;([]);
 const [loading, setLoading] = useState(false);</code></pre>
 
+<p>这两行是这个组件的<strong>状态（state）</strong>。你可以把状态想象成一个<strong>白板上的数据</strong>——页面上要显示什么、现在是什么情况，都写在这个白板上：</p>
+
+<ul>
+  <li><code>messages</code>：消息列表，一开始是空的 <code>[]</code></li>
+  <li><code>loading</code>：正在等回复吗？一开始是 <code>false</code>（没有在等）</li>
+</ul>
+
 <blockquote>
-  <p>这两行是这个组件的<strong>状态（state）</strong>。什么意思？</p>
-  <p>你可以把状态想象成一个<strong>白板上的数据</strong>。页面上要显示什么、现在是什么情况，都写在这个白板上。</p>
-  <ul>
-    <li><code>messages</code>：消息列表，一开始是空的 <code>[]</code></li>
-    <li><code>loading</code>：正在等回复吗？一开始是 <code>false</code>（没有在等）</li>
-  </ul>
-  <p>关键特性：<strong>状态一变，页面自动刷新</strong>。你不需要手动去改页面，只要改数据，React 会帮你更新页面。这个下节课会详细讲。</p>
+  <p><strong>关键特性：状态一变，页面自动刷新。</strong>你不需要手动去改页面，只要改数据，React 会帮你更新页面。</p>
 </blockquote>
 
-<h4>（2）useEffect 部分</h4>
+<h3>（2）useEffect — 页面加载时获取欢迎消息</h3>
 
 <pre><code>useEffect(() =&gt; {
   fetchWelcome().then((welcomeText) =&gt; {
-    setMessages([{ role: "assistant", content: welcomeText, ... }]);
+    setMessages([
+      {
+        role: "assistant",
+        content: welcomeText,
+        timestamp: new Date().toISOString(),
+      },
+    ]);
   });
 }, []);</code></pre>
 
-<blockquote>
-  <p>这段代码的意思是：<strong>页面第一次打开的时候，去后端拿欢迎消息，然后放到消息列表里</strong>。</p>
-  <p><code>fetchWelcome()</code> 就是上节课我们在 Network 面板里看到的那个 <code>/api/welcome</code> 请求。代码在这里，请求在 Network 面板里——能对上了吧？</p>
-</blockquote>
+<p>这段代码的意思是：<strong>页面第一次打开的时候，去后端拿欢迎消息，然后放到消息列表里</strong>。</p>
 
-<h4>（3）handleSend 部分</h4>
+<p><code>fetchWelcome()</code> 就是上节课你在 Network 面板里看到的那个 <code>/api/welcome</code> 请求。代码写在这里，请求出现在 Network 面板——两边对上了。</p>
+
+<h3>（3）handleSend — 用户发送消息</h3>
 
 <pre><code>const handleSend = async (text: string) =&gt; {
   // 1. 先把用户消息加到列表里
+  const userMsg: Message = { role: "user", content: text, ... };
   setMessages((prev) =&gt; [...prev, userMsg]);
   setLoading(true);
 
-  // 2. 发请求给后端，等回复
-  const { reply, timestamp } = await sendMessage(text);
+  try {
+    // 2. 发请求给后端，等回复
+    const { reply, timestamp } = await sendMessage(text);
 
-  // 3. 把回复加到列表里
-  setMessages((prev) =&gt; [...prev, assistantMsg]);
-  setLoading(false);
+    // 3. 把回复加到列表里
+    const assistantMsg: Message = { role: "assistant", content: reply, ... };
+    setMessages((prev) =&gt; [...prev, assistantMsg]);
+  } catch (err) {
+    // 请求失败时，显示错误信息
+  } finally {
+    setLoading(false);
+  }
 };</code></pre>
 
+<p>这就是你点"发送"之后发生的事：</p>
+
+<ol>
+  <li>把你输入的文字加到消息列表里（页面上立刻多一条消息气泡）</li>
+  <li>发请求给后端（Network 面板里会出现一个 <code>chat</code> 请求）</li>
+  <li>收到回复后，把回复也加到列表里（页面上又多一条气泡）</li>
+</ol>
+
 <blockquote>
-  <p>这就是你点"发送"之后发生的事：</p>
-  <ol>
-    <li>把你输入的文字加到消息列表里（页面上立刻多一条消息气泡）</li>
-    <li>发请求给后端（Network 面板里会出现一个 <code>chat</code> 请求）</li>
-    <li>收到回复后，把回复也加到列表里（页面上又多一条气泡）</li>
-  </ol>
-  <p>看到没有——<strong>整个流程就是在改 <code>messages</code> 这个状态</strong>。状态变了，页面就自动更新了。</p>
+  <p>整个流程就是在改 <code>messages</code> 这个状态。状态变了，页面就自动更新了。</p>
 </blockquote>
 
-<h4>（4）render 部分（JSX）</h4>
+<h3>（4）return 部分 — JSX 描述页面结构</h3>
 
 <pre><code>return (
   &lt;div className="app"&gt;
@@ -152,28 +244,146 @@ const [loading, setLoading] = useState(false);</code></pre>
   &lt;/div&gt;
 );</code></pre>
 
+<p>最后这部分描述页面长什么样。看起来像 HTML 对吧？这叫 JSX——React 用它来描述页面结构。注意两个自定义组件：</p>
+
+<ul>
+  <li><code>ChatWindow</code>：显示消息列表。它接收 <code>messages</code> 数据——App 把自己"白板"上的数据分享给了 ChatWindow。</li>
+  <li><code>ChatInput</code>：输入框。<code>onSend={handleSend}</code> 的意思是"用户点发送的时候，调用 handleSend 这个函数"。</li>
+</ul>
+
 <blockquote>
-  <p>最后这部分描述页面长什么样。看起来像 HTML 对吧？这叫 JSX——React 用它来描述页面结构。</p>
-  <p>注意两个自定义组件：</p>
-  <ul>
-    <li><code>ChatWindow</code>：显示消息列表。它接收 <code>messages</code> 数据——也就是说，App 把自己的"白板"分享给了 ChatWindow</li>
-    <li><code>ChatInput</code>：输入框。<code>onSend={handleSend}</code> 的意思是"用户点发送的时候，调用 handleSend 这个函数"</li>
-  </ul>
   <p>这就是 React 的组件结构：<strong>大组件把数据传给小组件，小组件把用户操作传回给大组件</strong>。</p>
 </blockquote>
 
-<h4>组件树</h4>
+<!-- 2.4 -->
+<h2>2.4 组件树：大组件套小组件</h2>
+
+<p>从 App 出发，整个前端页面的组件结构是这样的：</p>
 
 <pre>App（管家：管数据、管请求）
 ├── ChatWindow（展示：接收 messages，画出所有气泡）
 │   └── MessageBubble（展示：画一条消息）
 └── ChatInput（交互：用户输入，触发 onSend）</pre>
 
-<h3><span class="timeline">0:28-0:35</span> 第三步：追一条完整的数据流</h3>
+<p>我们来看看每个子组件长什么样。</p>
 
-<blockquote>
-  <p>我们来追踪一个完整的流程——用户发一条"你好"，到页面显示回复，中间经过了哪些文件。</p>
-</blockquote>
+<h3>ChatWindow — 聊天窗口</h3>
+
+<pre><code>import { useEffect, useRef } from "react";
+import { MessageBubble } from "./MessageBubble";
+import type { Message } from "../api";
+
+interface ChatWindowProps {
+  messages: Message[];
+  loading: boolean;
+}
+
+export function ChatWindow({ messages, loading }: ChatWindowProps) {
+  const bottomRef = useRef&lt;HTMLDivElement&gt;(null);
+
+  // 新消息出现时，自动滚到底部
+  useEffect(() =&gt; {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  return (
+    &lt;div className="chat-window"&gt;
+      {messages.map((msg, index) =&gt; (
+        &lt;MessageBubble key={index} message={msg} /&gt;
+      ))}
+      {loading &amp;&amp; (
+        &lt;div className="typing-indicator"&gt;
+          &lt;span&gt;&lt;/span&gt;
+          &lt;span&gt;&lt;/span&gt;
+          &lt;span&gt;&lt;/span&gt;
+        &lt;/div&gt;
+      )}
+      &lt;div ref={bottomRef} /&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+
+<p>ChatWindow 接收 <code>messages</code> 数组，用 <code>.map()</code> 把每条消息变成一个 <code>MessageBubble</code> 组件。如果 <code>loading</code> 为 true，还会显示一个"正在输入"的动画。</p>
+
+<h3>MessageBubble — 单条消息气泡</h3>
+
+<pre><code>import type { Message } from "../api";
+
+interface MessageBubbleProps {
+  message: Message;
+}
+
+export function MessageBubble({ message }: MessageBubbleProps) {
+  const isUser = message.role === "user";
+
+  return (
+    &lt;div className={`message-row ${isUser ? "message-row-user" : "message-row-assistant"}`}&gt;
+      {!isUser &amp;&amp; &lt;div className="avatar avatar-assistant"&gt;AI&lt;/div&gt;}
+      &lt;div className={`bubble ${isUser ? "bubble-user" : "bubble-assistant"}`}&gt;
+        {message.content}
+      &lt;/div&gt;
+      {isUser &amp;&amp; &lt;div className="avatar avatar-user"&gt;我&lt;/div&gt;}
+    &lt;/div&gt;
+  );
+}</code></pre>
+
+<p>MessageBubble 通过 <code>message.role === "user"</code> 来判断这条消息是谁发的。用户的消息用 <code>bubble-user</code> 样式靠右显示，助手的消息用 <code>bubble-assistant</code> 样式靠左显示。</p>
+
+<h3>ChatInput — 输入框和发送按钮</h3>
+
+<pre><code>import { useState } from "react";
+
+interface ChatInputProps {
+  onSend: (text: string) =&gt; void;
+  disabled: boolean;
+}
+
+export function ChatInput({ onSend, disabled }: ChatInputProps) {
+  const [text, setText] = useState("");
+
+  const handleSubmit = () =&gt; {
+    const trimmed = text.trim();
+    if (!trimmed || disabled) return;
+
+    onSend(trimmed);
+    setText("");
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) =&gt; {
+    if (e.key === "Enter" &amp;&amp; !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit();
+    }
+  };
+
+  return (
+    &lt;div className="chat-input-bar"&gt;
+      &lt;input
+        className="chat-input"
+        type="text"
+        placeholder="输入消息..."
+        value={text}
+        onChange={(e) =&gt; setText(e.target.value)}
+        onKeyDown={handleKeyDown}
+        disabled={disabled}
+      /&gt;
+      &lt;button
+        className="send-button"
+        onClick={handleSubmit}
+        disabled={disabled || !text.trim()}
+      &gt;
+        发送
+      &lt;/button&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+
+<p>ChatInput 有自己的状态 <code>text</code> 来记录用户正在输入的内容。用户点发送（或按 Enter），它会调用从 App 传下来的 <code>onSend</code> 函数，把文字传上去，然后清空输入框。</p>
+
+<!-- 2.5 -->
+<h2>2.5 追踪一条完整的数据流</h2>
+
+<p>现在让我们把所有文件串起来——追踪一个完整的流程：用户发一条"你好"，到页面显示回复，中间经过了哪些文件、哪些函数。</p>
 
 <pre>1. 用户在输入框打字、点发送
    → ChatInput.tsx：handleSubmit() 被调用
@@ -181,7 +391,7 @@ const [loading, setLoading] = useState(false);</code></pre>
 
 2. App 收到文字
    → App.tsx：handleSend(text) 被调用
-   → 先 setMessages 把用户消息加到列表
+   → 先 setMessages 把用户消息加到列表（页面立刻更新）
    → 调 sendMessage(text) 发请求
 
 3. 发请求给后端
@@ -197,17 +407,103 @@ const [loading, setLoading] = useState(false);</code></pre>
    → App.tsx：handleSend() 把回复加到 messages
    → 页面自动更新，ChatWindow 多了一条气泡</pre>
 
+<p>6 个文件串起来了：<strong>ChatInput → App → api.ts → server/index.ts → api.ts → App → ChatWindow</strong>。</p>
+
+<p>我们来看看中间两个关键文件的代码。</p>
+
+<h3>api.ts — 前端跟后端通信</h3>
+
+<pre><code>/** 消息的数据结构 */
+export interface Message {
+  role: "user" | "assistant";
+  content: string;
+  timestamp: string;
+}
+
+/** 获取欢迎消息：GET /api/welcome */
+export async function fetchWelcome(): Promise&lt;string&gt; {
+  const response = await fetch("/api/welcome");
+  const data = (await response.json()) as { message: string };
+  return data.message;
+}
+
+/** 发送消息并获取回复：POST /api/chat */
+export async function sendMessage(message: string): Promise&lt;{ reply: string; timestamp: string }&gt; {
+  const response = await fetch("/api/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message }),
+  });
+
+  if (!response.ok) {
+    const errorData = (await response.json().catch(() =&gt; ({}))) as { error?: string };
+    const errorText = errorData.error ?? `请求失败 (${response.status})`;
+    throw new Error(errorText);
+  }
+
+  const data = (await response.json()) as { reply: string; timestamp: string };
+  return data;
+}</code></pre>
+
+<p><code>sendMessage()</code> 用 <code>fetch</code> 发了一个 POST 请求到 <code>/api/chat</code>，把用户的消息放在请求体里。后端返回的 JSON 里有 <code>reply</code> 和 <code>timestamp</code>。</p>
+
+<h3>server/index.ts — 后端处理请求</h3>
+
+<pre><code>app.post("/api/chat", (req, res) =&gt; {
+  const { message } = req.body as { message: string };
+
+  // ... 错误处理（省略）...
+
+  const reply = getReply(message);        // 根据关键词匹配回复
+  const now = new Date().toISOString();
+
+  chatHistory.push({ role: "user", content: message, timestamp: now });
+  chatHistory.push({ role: "assistant", content: reply, timestamp: now });
+
+  setTimeout(() =&gt; {
+    res.json({ reply, timestamp: now });  // 返回 JSON 给前端
+  }, 500);
+});</code></pre>
+
+<p>后端从 <code>req.body</code> 里拿到前端发来的消息，调 <code>getReply()</code> 生成回复，然后通过 <code>res.json()</code> 返回给前端。</p>
+
+<h3>replies.ts — 回复规则</h3>
+
+<p><code>getReply()</code> 的逻辑在 <code>server/replies.ts</code> 里。它根据用户消息中的关键词匹配回复：</p>
+
+<pre><code>const rules: ReplyRule[] = [
+  {
+    keywords: ["你好", "hi", "hello", "嗨"],
+    reply: "你好呀！很高兴见到你，有什么想聊的吗？",
+  },
+  {
+    keywords: ["天气"],
+    reply: "我没有联网功能，查不了天气哦。不过你可以打开 DevTools 的 Network 面板，看看我们之间的请求长什么样！",
+  },
+  // ... 更多规则 ...
+];
+
+export function getReply(userMessage: string): string {
+  const msg = userMessage.toLowerCase();
+  for (const rule of rules) {
+    if (rule.keywords.some((kw) =&gt; msg.includes(kw))) {
+      return rule.reply;
+    }
+  }
+  // 没匹配到关键词，随机选一条通用回复
+  return genericReplies[Math.floor(Math.random() * genericReplies.length)];
+}</code></pre>
+
 <blockquote>
-  <p>6 个文件串起来了：<strong>ChatInput → App → api.ts → server/index.ts → api.ts → App → ChatWindow</strong>。</p>
-  <p>以后遇到 bug，你就沿着这条线找——请求发出去了吗？看 api.ts 和 Network。数据返回了吗？看 server。页面没更新？看 App 的状态有没有变。</p>
+  <p><strong>以后遇到 bug，你就沿着这条数据流找</strong>——请求发出去了吗？看 api.ts 和 Network 面板。数据返回了吗？看 server。页面没更新？看 App 的状态有没有变。</p>
 </blockquote>
 
-<!-- JS 核心概念速查卡 -->
-<h2><span class="timeline">0:35-0:40</span> JS 核心概念速查卡</h2>
+<!-- 2.6 -->
+<h2>2.6 JS / React 速查卡</h2>
 
-<blockquote>
-  <p>刚才读代码时你们可能看到很多不认识的写法，这很正常。最常见的整理成一张速查卡，以后遇到了翻出来看一眼就行。</p>
-</blockquote>
+<p>读代码时你可能遇到很多不认识的写法，这很正常。下面是最常见的整理成速查表，遇到了翻一下就行。</p>
+
+<h4>JavaScript 基础</h4>
 
 <table>
   <thead>
@@ -240,6 +536,10 @@ const [loading, setLoading] = useState(false);</code></pre>
     <tr>
       <td><code>.then(callback)</code></td>
       <td>另一种等待方式，"等结果出来后执行 callback"</td>
+    </tr>
+    <tr>
+      <td><code>interface Xxx { ... }</code></td>
+      <td>定义数据的结构（有哪些字段、什么类型）</td>
     </tr>
   </tbody>
 </table>
@@ -274,76 +574,76 @@ const [loading, setLoading] = useState(false);</code></pre>
       <td><code>{数组.map(item =&gt; ...)}</code></td>
       <td>把数组里的每一项变成一个页面元素</td>
     </tr>
+    <tr>
+      <td><code>useRef</code></td>
+      <td>拿到一个 DOM 元素的引用，可以直接操作它</td>
+    </tr>
   </tbody>
 </table>
 
 <blockquote>
-  <p><strong>不需要背</strong>。读代码的时候认不出来就来查这张卡。用多了自然就记住了。</p>
+  <p><strong>不需要背。</strong>读代码的时候认不出来就来查这张表，用多了自然就记住了。</p>
 </blockquote>
 
-<!-- 动手环节 -->
-<h2><span class="timeline">0:40-0:50</span> 动手环节：你来读一遍</h2>
+<!-- 2.7 -->
+<h2>2.7 练习：带着问题读代码</h2>
 
-<blockquote>
-  <p>现在换你们来。我们从一个具体的问题出发——带着问题读代码，比漫无目的地看有效得多。</p>
-</blockquote>
-
-<div class="task-list">
-  <h4>动手任务：从问题出发，读代码找答案</h4>
-  <p>打开 Demo 项目（<code>lessons/lesson-1/demo</code>），用 VS Code 看代码来回答以下问题。<br><strong>不许跑代码，纯看代码回答！</strong></p>
-</div>
+<p>带着问题读代码，比漫无目的地看有效得多。下面是四个练习任务，打开 Demo 项目（<code>lessons/lesson-1/demo</code>），用 VS Code 看代码来回答。<strong>不许跑代码，纯看代码回答！</strong></p>
 
 <div class="task-list">
   <h4>任务 1（热身）</h4>
   <p>欢迎消息"你好！我是 Demo 助手，有什么可以帮你的？"写在哪个文件的第几行？</p>
+  <p>提示：用 VS Code 的全局搜索（<code>Cmd+Shift+F</code>）搜关键词。</p>
 </div>
 
 <div class="task-list">
   <h4>任务 2（追数据流）</h4>
   <p>当用户发送"天气"这个词时，页面上会显示什么回复？</p>
-  <p>追踪路径：从 <code>App.tsx</code> 的 <code>handleSend</code> → <code>api.ts</code> → <code>server/index.ts</code> → <code>replies.ts</code></p>
+  <p>追踪路径：<code>App.tsx</code> 的 <code>handleSend</code> → <code>api.ts</code> → <code>server/index.ts</code> → <code>replies.ts</code></p>
   <p>写出你找到的回复内容。</p>
 </div>
 
 <div class="task-list">
   <h4>任务 3（理解组件）</h4>
-  <p><code>MessageBubble</code> 组件怎么判断一条消息是"用户发的"还是"助手回的"？它们在页面上有什么区别？</p>
-  <p>提示：看 <code>className</code></p>
+  <p><code>MessageBubble</code> 组件怎么判断一条消息是"用户发的"还是"助手回的"？它们在页面上有什么视觉区别？</p>
+  <p>提示：看 <code>className</code> 是怎么设置的。</p>
 </div>
 
 <div class="task-list">
-  <h4>任务 4（加分）</h4>
-  <p>如果我想在欢迎消息里加上当前时间，应该改哪个文件的哪几行？不需要真的改，描述你的思路就行。</p>
+  <h4>任务 4（加分挑战）</h4>
+  <p>如果你想在欢迎消息里加上当前时间，应该改哪个文件的哪几行？不需要真的改，描述你的思路就行。</p>
 </div>
 
-<h4>常见卡点提示</h4>
+<h4>卡住了？看看这些提示</h4>
 <ul>
-  <li><strong>不知道从哪个文件开始？</strong> 找跟关键词相关的文件名，或者用 VS Code 的全局搜索（<code>Cmd+Shift+F</code>）搜关键词。</li>
-  <li><strong>看不懂 import 路径？</strong> <code>./</code> 是当前目录，<code>../</code> 是上一级目录。</li>
-  <li><strong>追到 api.ts 就断了？</strong> api.ts 发了一个请求到 <code>/api/chat</code>，那后端谁在处理这个路径？去 <code>server/</code> 里找。</li>
-  <li><strong>不理解 <code>req.body</code>？</strong> 前端用 fetch 发送的 JSON 数据，后端通过 <code>req.body</code> 接收。</li>
+  <li><strong>不知道从哪个文件开始？</strong>找跟关键词相关的文件名，或者用 <code>Cmd+Shift+F</code> 全局搜索关键词。</li>
+  <li><strong>看不懂 import 路径？</strong><code>./</code> 是当前目录，<code>../</code> 是上一级目录。</li>
+  <li><strong>追到 api.ts 就断了？</strong>api.ts 发了一个请求到 <code>/api/chat</code>，那后端谁在处理这个路径？去 <code>server/</code> 里找。</li>
+  <li><strong>不理解 <code>req.body</code>？</strong>前端用 fetch 发送的 JSON 数据，后端通过 <code>req.body</code> 接收。</li>
 </ul>
 
-<!-- 总结 -->
-<h2><span class="timeline">0:50-0:55</span> 总结</h2>
+<!-- 2.8 -->
+<h2>2.8 本课小结 + 课后作业</h2>
+
+<h3>小结</h3>
+
+<p>这节课的核心就一个方法：<strong>找入口，顺着数据流走</strong>。</p>
+
+<ol>
+  <li>找到入口文件（通常叫 main / index / app）</li>
+  <li>看入口引用了谁（看 import）</li>
+  <li>带着具体的问题，沿着数据流追踪：事件 → 函数 → 请求 → 响应 → 状态更新 → 页面刷新</li>
+</ol>
 
 <blockquote>
-  <p>今天的核心就一个方法：<strong>找入口，顺着数据流走</strong>。</p>
-  <p>再重复一下步骤：</p>
-  <ol>
-    <li>找到入口文件（通常叫 main / index / app）</li>
-    <li>看入口引用了谁（看 import）</li>
-    <li>带着具体的问题，沿着数据流追踪：事件 → 函数 → 请求 → 响应 → 状态更新 → 页面刷新</li>
-  </ol>
   <p>你不需要一行一行全部读完。<strong>读代码是为了回答一个具体的问题</strong>——"这个按钮点了之后调了哪个接口？""这段文字是从哪里来的？"有了问题，你才知道该追哪条线。</p>
 </blockquote>
 
-<!-- 作业 -->
-<h2><span class="timeline">0:55-1:00</span> 课后作业</h2>
+<h3>课后作业</h3>
 
 <div class="task-list">
-  <h4>第 2 课作业：读代码回答问题</h4>
-  <p>打开你自己的 vibe coding 项目（或 Demo 项目），回答以下问题：</p>
+  <h4>作业：用"找入口 + 追数据流"的方法读你自己的项目</h4>
+  <p>打开你自己的 vibe coding 项目（如果还没有，用 Demo 项目也行），完成以下任务：</p>
   <ol>
     <li>找到你项目的入口文件是哪个，截图或写出文件路径</li>
     <li>从入口文件出发，画出你项目的组件树（格式不限：文本缩进、手绘拍照、任何方式都行）</li>
@@ -352,12 +652,9 @@ const [loading, setLoading] = useState(false);</code></pre>
   <p>提交方式：放到 <code>homework/你的文件夹/</code> 下，文件名建议 <code>lesson-2-read-code.md</code></p>
 </div>
 
-<!-- 下节预告 -->
-<h2>下节预告</h2>
+<h3>下节预告</h3>
 
-<blockquote>
-  <p>下节课我们讲 <strong>React 的心智模型</strong>——组件、状态、渲染。今天我们已经看到了 <code>useState</code>、<code>props</code>、组件树这些概念，下节课会把它们讲透：为什么状态一变页面就更新？props 到底是怎么传的？搞懂这些，你就能看懂 AI 写的绝大部分 React 代码了。</p>
-</blockquote>
+<p>下节课我们讲 <strong>React 的心智模型</strong>——组件、状态、渲染。这节课你已经见到了 <code>useState</code>、<code>props</code>、组件树这些概念，下节课会把它们讲透：为什么状态一变页面就更新？props 到底是怎么传的？搞懂这些，你就能看懂 AI 写的绝大部分 React 代码了。</p>
 
 <div class="footer">
   <p>编程入门课程 &copy; 2026</p>
