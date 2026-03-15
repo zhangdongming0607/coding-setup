@@ -150,6 +150,37 @@ const [loading, setLoading] = useState(false);
 
 这两个状态有什么用？**状态一变，页面自动刷新**。你不需要手动去改页面上的文字或者增删元素，只要改白板上的数据，React 会自动帮你重新画页面。这个机制下节课会详细讲，今天先记住这个结论。
 
+但为什么不能用普通变量呢？比如直接写 `let messages = []`，往里面 push 不也行吗？
+
+我们拿项目里发消息的代码来对比一下：
+
+```tsx
+// ❌ 假如用普通变量
+let messages = [];
+
+const handleSend = async (text: string) => {
+  messages.push({ role: "user", content: text, ... });
+  // messages 确实变了——但页面上什么都没发生
+  // 你打了字，点了发送，聊天窗口还是空的
+};
+```
+
+```tsx
+// ✅ 项目里实际的写法
+const [messages, setMessages] = useState<Message[]>([]);
+
+const handleSend = async (text: string) => {
+  setMessages((prev) => [...prev, userMsg]);
+  // 页面立刻多了一条消息气泡
+};
+```
+
+区别就一件事：`useState` 的 set 函数是一个**变更通知机制**。你调 `setMessages()`，相当于告诉 React："数据变了，请重新画页面。"普通变量没有这个通知能力——数据改了，React 根本不知道，页面就纹丝不动。
+
+再看 `loading` 更直观——`setLoading(true)` 的时候发送按钮变灰、出现加载动画；`setLoading(false)` 按钮恢复。如果用 `let loading = true`，按钮永远不会变。
+
+所以 `useState` 的本质就是：**你跟 React 之间的通信通道。通过 set 函数通知 React 数据变了，React 才会更新页面。**
+
 另外注意写法：`useState` 返回的是一对东西——**当前值**和**修改函数**。`messages` 是当前值，`setMessages` 是用来改它的函数。想改白板上的内容，必须用 `set` 开头的那个函数，不能直接改。
 
 #### useEffect
