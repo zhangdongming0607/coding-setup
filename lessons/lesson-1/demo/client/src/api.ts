@@ -39,6 +39,12 @@ export async function sendMessage(message: string): Promise<{ reply: string; tim
     body: JSON.stringify({ message }),
   });
 
+  if (!response.ok) {
+    const errorData = (await response.json().catch(() => ({}))) as { error?: string };
+    const errorText = errorData.error ?? `请求失败 (${response.status})`;
+    throw new Error(errorText);
+  }
+
   const data = (await response.json()) as { reply: string; timestamp: string };
 
   console.log("[前端] 收到回复:", data.reply);

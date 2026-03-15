@@ -38,17 +38,28 @@ export function App() {
     setMessages((prev) => [...prev, userMsg]);
     setLoading(true);
 
-    // 2. 发请求给后端，等回复
-    const { reply, timestamp } = await sendMessage(text);
+    try {
+      // 2. 发请求给后端，等回复
+      const { reply, timestamp } = await sendMessage(text);
 
-    // 3. 把回复加到列表里
-    const assistantMsg: Message = {
-      role: "assistant",
-      content: reply,
-      timestamp,
-    };
-    setMessages((prev) => [...prev, assistantMsg]);
-    setLoading(false);
+      // 3. 把回复加到列表里
+      const assistantMsg: Message = {
+        role: "assistant",
+        content: reply,
+        timestamp,
+      };
+      setMessages((prev) => [...prev, assistantMsg]);
+    } catch (err) {
+      // 请求失败时，把错误信息显示在聊天里
+      const errorMsg: Message = {
+        role: "assistant",
+        content: `⚠️ ${err instanceof Error ? err.message : "请求失败"}`,
+        timestamp: new Date().toISOString(),
+      };
+      setMessages((prev) => [...prev, errorMsg]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

@@ -34,7 +34,10 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
         type="text"
         placeholder="输入消息..."
         value={text}
-        onChange={(e) => setText(e.target.value)}
+        onChange={(e) => {
+          console.log("用户输入:", e.target.value);
+          setText(e.target.value);
+        }}
         onKeyDown={handleKeyDown}
         disabled={disabled}
       />
