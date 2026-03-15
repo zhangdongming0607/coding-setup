@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第 2 课作业 — 读代码回答问题</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+
+<nav class="nav">
+  <a href="index.html" class="nav-back">&larr; 课程首页</a>
+</nav>
+
+<h1>第 2 课作业</h1>
+<p class="subtitle">读代码回答问题</p>
+
+<!-- 任务 1 -->
+<div class="card">
+<h2 style="margin-top: 0;">任务 1：找到入口文件</h2>
+
+<ol>
+<li>打开 <a href="https://github.com/zhangdongming0607/coding-setup/tree/main/lessons/lesson-1/demo">Demo 项目</a>（就是第一课用的那个聊天助手项目）</li>
+<li>找到前端的入口文件是哪个（提示：先找 <code>index.html</code>，看里面的 <code>&lt;script&gt;</code> 指向谁）</li>
+<li>截图或写出入口文件的路径</li>
+<li>用几句话描述这个入口文件做了什么</li>
+</ol>
+</div>
+
+<!-- 任务 2 -->
+<div class="card">
+<h2 style="margin-top: 0;">任务 2：画出组件树</h2>
+
+<ol>
+<li>从入口文件出发，顺着 <code>import</code> 找到根组件（通常是 <code>App</code>）</li>
+<li>看根组件的 <code>return</code> 部分引用了哪些子组件</li>
+<li>画出项目的组件树，标注每个组件的职责</li>
+</ol>
+
+<p>格式不限——文本缩进、手绘拍照、用任何你顺手的工具都行。参考格式：</p>
+
+<pre><code>App（管家：管数据、管请求）
+├── Header（展示：显示标题）
+├── ChatWindow（展示：接收 messages，画出所有气泡）
+│   └── MessageBubble（展示：画一条消息）
+└── ChatInput（交互：用户输入，触发 onSend）</code></pre>
+</div>
+
+<!-- 任务 3 -->
+<div class="card">
+<h2 style="margin-top: 0;">任务 3：追踪一条数据流</h2>
+
+<ol>
+<li>挑一个 Demo 项目里的用户交互（比如发送消息、点按钮）</li>
+<li>像课上一样，从用户操作开始，一步一步追踪数据经过了哪些文件、哪些函数</li>
+<li>写出每一步：</li>
+</ol>
+
+<pre><code>第一步：用户在 ______ 组件里点了 ______
+第二步：触发了 ______ 文件的 ______ 函数，它做了 ______
+第三步：...</code></pre>
+
+<p>一直追到最终页面更新为止。如果中间有发请求给后端，也要写出来。</p>
+
+<blockquote>
+<p>小技巧：VS Code 里按 <code>Cmd+Shift+F</code> 可以全局搜索关键词，帮你快速定位代码在哪个文件里。</p>
+</blockquote>
+</div>
+
+<!-- 提交方式 -->
+<div class="card">
+<h2 style="margin-top: 0;">提交方式</h2>
+
+<p>跟 AI 说：</p>
+
+<pre><code>1. 帮我拉取最新代码
+2. 帮我创建一个新分支，分支名叫 homework/我的名字/lesson-2
+3. 我已经把作业写好放到 homework/我的目录/ 里了，帮我提交，说明是"第 2 课作业"
+4. 帮我推到 GitHub 上</code></pre>
+
+<p>然后去 GitHub 网页上提 PR：</p>
+
+<ol>
+<li>打开 <a href="https://github.com/zhangdongming0607/coding-setup">coding-setup</a></li>
+<li>点页面顶部的黄色提示条 <strong>"Compare &amp; pull request"</strong></li>
+<li>标题写 <code>第 2 课作业 - 你的名字</code></li>
+<li>点 <strong>Create pull request</strong></li>
+</ol>
+
+<p>注意：提完 PR 就行了，不要点那个绿色的 <strong>Merge pull request</strong> 按钮，等老师 review。</p>
+</div>
+
+<p class="footer">编程入门课程 &copy; 2026</p>
+</div>
+</body>
+</html>
