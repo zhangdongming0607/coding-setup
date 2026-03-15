@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第 2 课教案：读代码 — 看懂 AI 写了什么</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+
+<nav class="nav">
+  <a href="index.html" class="nav-back">&larr; 课程首页</a>
+</nav>
+
+<h1>第 2 课教案：读代码 — 看懂 AI 写了什么</h1>
+
+<blockquote>
+  <p><strong>目标</strong>：让学员掌握"读代码"的基本方法——找到入口、顺着数据流走，能在 Demo 项目中从入口文件一路追踪到页面渲染，并认识读代码时会遇到的 JS 核心概念。</p>
+</blockquote>
+
+<!-- 课前准备 -->
+<h2>课前准备</h2>
+
+<h3>讲师侧</h3>
+
+<div class="task-list">
+  <ul>
+    <li>确认 Demo 项目本地能跑通</li>
+    <li>在 VS Code 中提前打开 Demo 项目，折叠 node_modules</li>
+    <li>准备好「面包屑导航」板书（白板/飞书文档），用于现场画数据流</li>
+    <li>准备一段 AI 生成的代码片段（用于动手环节）</li>
+    <li>开启屏幕录制工具</li>
+  </ul>
+</div>
+
+<h3>学员侧</h3>
+
+<div class="task-list">
+  <ul>
+    <li>第一课的 Demo 项目还在本地</li>
+    <li>VS Code 已安装</li>
+  </ul>
+</div>
+
+<!-- 课程流程 -->
+<h2>课程流程</h2>
+
+<h3><span class="timeline">0:00-0:05</span> 开场 &amp; 回顾</h3>
+
+<ul>
+  <li>衔接上节课，引出"读代码"的动机</li>
+  <li>核心问题：AI 写的代码跑起来了但不知道它在干嘛</li>
+</ul>
+
+<h3><span class="timeline">0:05-0:15</span> 方法论：找入口，顺着数据流走</h3>
+
+<ul>
+  <li>第一步：找入口（从 <code>index.html</code> 的 script 标签找到 <code>main.tsx</code>）</li>
+  <li>第二步：顺着数据流走（用户操作 &rarr; 函数 &rarr; 请求 &rarr; 状态更新 &rarr; 页面刷新）</li>
+  <li>穿插讲：<code>import</code> 的两种写法（相对路径 vs 第三方库）</li>
+  <li>Figma 类比：<code>node_modules</code> 像 Assets 面板里的团队组件库</li>
+</ul>
+
+<h3><span class="timeline">0:15-0:35</span> 实战：跟我读一遍 Demo 项目</h3>
+
+<h4>找入口（0:15-0:20）</h4>
+
+<ul>
+  <li>打开 <code>index.html</code>，看 script 标签指向 <code>main.tsx</code></li>
+  <li>打开 <code>main.tsx</code>，看它把 <code>App</code> 渲染到 root 容器</li>
+  <li>讲解 <code>import</code> 写法和路径概念</li>
+</ul>
+
+<h4>读根组件 App.tsx（0:20-0:28）</h4>
+
+<ul>
+  <li>状态声明：<code>messages</code> 和 <code>loading</code>（白板类比）</li>
+  <li><code>useEffect</code>：页面加载时获取欢迎消息</li>
+  <li>跳到 <code>api.ts</code> 看 <code>fetchWelcome</code> 的实现</li>
+  <li>用 Console 面板验证数据流（让学员动手）</li>
+  <li><code>handleSend</code>：发送消息的三步流程</li>
+  <li>JSX/render：组件树结构（管家与员工的类比）</li>
+</ul>
+
+<h4>动手加组件（穿插）</h4>
+
+<ul>
+  <li>让学员创建 <code>MessageCount</code> 组件</li>
+  <li>在 App 中引入并传入 <code>messages.length</code></li>
+  <li>验证状态变化自动更新页面</li>
+</ul>
+
+<h4>追完整数据流（0:28-0:35）</h4>
+
+<ul>
+  <li>追踪"你好"从输入到显示回复的完整路径</li>
+  <li><code>ChatInput</code> &rarr; <code>App</code> &rarr; <code>api.ts</code> &rarr; 后端（简略）&rarr; <code>api.ts</code> &rarr; <code>App</code> &rarr; <code>ChatWindow</code></li>
+  <li>后端细节留给第 4 课</li>
+</ul>
+
+<h3><span class="timeline">0:35-0:40</span> JS 和 React 的关系 + 速查卡</h3>
+
+<ul>
+  <li>JS 是语言，React 是工具（中文 vs 飞书文档类比）</li>
+  <li>发速查卡到群里（JS 基础 + React 特有）</li>
+</ul>
+
+<h3><span class="timeline">0:40-0:50</span> 动手环节</h3>
+
+<p>四个任务：</p>
+
+<ol>
+  <li>搜索找到欢迎消息在哪个文件</li>
+  <li>从 <code>ChatInput</code> 出发追踪"天气"的数据流</li>
+  <li><code>MessageBubble</code> 怎么区分用户消息和助手消息</li>
+  <li>（加分）加一条新关键词回复要改哪里</li>
+</ol>
+
+<blockquote>
+  <p><strong>VS Code 技巧</strong>：<code>Cmd+Shift+F</code> 全局搜索</p>
+</blockquote>
+
+<h3><span class="timeline">0:50-1:00</span> 答疑 + 作业 + 预告</h3>
+
+<ul>
+  <li>总结：找入口，顺着数据流走</li>
+  <li>作业：读自己的项目，找入口、画组件树、追一条数据流</li>
+  <li>预告第 3 课：React 心智模型</li>
+</ul>
+
+<!-- 备课检查清单 -->
+<h2>备课检查清单</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>项目</th>
+      <th>状态</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Demo 项目本地能跑通</td>
+      <td>&#9744;</td>
+    </tr>
+    <tr>
+      <td>VS Code 已打开 Demo 项目</td>
+      <td>&#9744;</td>
+    </tr>
+    <tr>
+      <td>板书/文档准备好</td>
+      <td>&#9744;</td>
+    </tr>
+    <tr>
+      <td>JS 速查卡已写好</td>
+      <td>&#9744;</td>
+    </tr>
+    <tr>
+      <td>动手任务文本已写好</td>
+      <td>&#9744;</td>
+    </tr>
+    <tr>
+      <td>作业文本已写好</td>
+      <td>&#9744;</td>
+    </tr>
+    <tr>
+      <td>录屏工具已准备</td>
+      <td>&#9744;</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- 应急预案 -->
+<h2>应急预案</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>情况</th>
+      <th>应对</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>学员的 Demo 项目丢了</td>
+      <td>在线看 GitHub 代码或看讲师屏幕</td>
+    </tr>
+    <tr>
+      <td>学员对 JS 语法完全没概念</td>
+      <td>聚焦"找关键词"和"看注释"，不教语法</td>
+    </tr>
+    <tr>
+      <td>学员在动手环节卡住</td>
+      <td>降低难度，先做任务 1 获得成功经验</td>
+    </tr>
+    <tr>
+      <td>追数据流时学员跟丢了</td>
+      <td>回到板书，先定位当前环节</td>
+    </tr>
+    <tr>
+      <td>课程进度快</td>
+      <td>当场开始做作业</td>
+    </tr>
+    <tr>
+      <td>课程进度慢</td>
+      <td>砍速查卡环节，课后发群里</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- 关键原则 -->
+<h2>关键原则</h2>
+
+<ol>
+  <li><strong>一个核心方法</strong>：找入口，顺着数据流走</li>
+  <li><strong>带着问题读</strong>：不是逐行翻译</li>
+  <li><strong>不要教语法</strong>：只需能认出常见写法</li>
+  <li><strong>用已知的代码</strong>：所有演示用上节课的 Demo 项目</li>
+  <li><strong>VS Code 搜索是大招</strong>：教 <code>Cmd+Shift+F</code></li>
+</ol>
+
+<div class="footer">
+  <p>编程入门课程 &copy; 2026</p>
+</div>
+
+</div>
+</body>
+</html>

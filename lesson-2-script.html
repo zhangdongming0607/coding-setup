@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第 2 课逐字稿：读代码 — 看懂 AI 写了什么</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+
+<nav class="nav">
+  <a href="index.html" class="nav-back">&larr; 课程首页</a>
+</nav>
+
+<h1>第 2 课逐字稿：读代码 — 看懂 AI 写了什么</h1>
+
+<!-- 0:00-0:05 -->
+<h2><span class="timeline">0:00-0:05</span> 开场 &amp; 回顾</h2>
+
+<p>上节课我们搞清楚了一件事——你在浏览器输入网址、按回车，到页面出现，中间是浏览器和服务器在来回传东西。我们还学会了用 DevTools 的 Network 面板去"偷看"这个过程。</p>
+
+<p>今天进入下一步。你们用 AI 写代码，最常遇到的情况是什么？——跑起来了，但不知道它在干嘛。改一个地方，另一个地方崩了，不知道为什么。</p>
+
+<p>这就是因为你没有"读过"那些代码。今天这节课就教一件事：<strong>怎么读代码</strong>。注意，不是"学会写代码"，是学会读。就像你不需要会做菜，但你要能看懂菜单上写的是什么。</p>
+
+<blockquote>
+  <p>读代码有方法的，不是从第一行看到最后一行。方法就八个字：<strong>找入口，顺着数据流走</strong>。今天我们用上节课的 Demo 项目来练这个方法。</p>
+</blockquote>
+
+<!-- 0:05-0:15 -->
+<h2><span class="timeline">0:05-0:15</span> 方法论：找入口，顺着数据流走</h2>
+
+<p>读代码跟读一本书不一样。书从第一页翻就行了，但代码不是线性的——几十个文件摆在面前，从哪个开始？</p>
+
+<p>方法就两步。</p>
+
+<blockquote>
+  <p><strong>第一步：找入口。</strong>每个程序都有一个"最先被执行的文件"，这就是入口。找到它，你就有了起点。</p>
+</blockquote>
+
+<p>前端项目的入口怎么找？还记得上节课说的吗——浏览器最先拿到的是一个 HTML 文件。所以入口就是 <code>index.html</code>。我们打开看一眼。</p>
+
+<p><em>（打开 <code>client/index.html</code>）</em></p>
+
+<pre><code>&lt;div id="root"&gt;&lt;/div&gt;
+&lt;script type="module" src="/src/main.tsx"&gt;&lt;/script&gt;</code></pre>
+
+<p>就这两行关键的。第一行是一个空容器，React 会把整个页面画在这里面。第二行是一个 <code>script</code> 标签，浏览器看到它就会去加载 <code>main.tsx</code> 来执行。所以——<strong>HTML 是起点，但真正的逻辑从 <code>main.tsx</code> 开始</strong>。</p>
+
+<p>以后你拿到任何前端项目，先找 <code>index.html</code>，看里面的 <code>&lt;script&gt;</code> 标签指向谁，那就是 JS 的入口。</p>
+
+<blockquote>
+  <p><strong>第二步：顺着数据流走。</strong>找到入口之后，怎么继续往下读？追踪数据是怎么流动的。什么叫数据流？就是这个过程：</p>
+</blockquote>
+
+<p><em>（板书画出来）</em></p>
+
+<pre>用户操作（点按钮、打字）
+  → 触发一个函数
+    → 函数去改数据，或者发请求给后端
+      → 数据变了，页面自动更新</pre>
+
+<p>你读代码的时候，就是在这条线上找你关心的那个环节。比如页面上一个文字显示不对，你就从"页面渲染"往回追——这个文字的数据从哪来的？是前端自己算的，还是后端返回的？一路往上游追，就能找到问题出在哪。</p>
+
+<p>这个方法适用于任何项目，不管它用什么框架。今天我们用上节课的 Demo 项目来练一遍。</p>
+
+<!-- 0:15-0:35 -->
+<h2><span class="timeline">0:15-0:35</span> 实战：跟我读一遍 Demo 项目</h2>
+
+<h3><span class="timeline">0:15-0:20</span> 第一步：找入口</h3>
+
+<p>打开 VS Code，看 Demo 项目的前端代码——<code>client</code> 文件夹。</p>
+
+<p>第一步，找入口。刚才说了，前端的入口是 HTML 文件。打开 <code>client/index.html</code>。</p>
+
+<p><em>（打开 <code>client/index.html</code>）</em></p>
+
+<p>内容很短，关键就两行：</p>
+
+<pre><code>&lt;div id="root"&gt;&lt;/div&gt;
+&lt;script type="module" src="/src/main.tsx"&gt;&lt;/script&gt;</code></pre>
+
+<p>第一行，一个空的 <code>div</code>，id 叫 <code>root</code>。这就是一个空容器——React 会把整个页面画在这个容器里。</p>
+
+<p>第二行，一个 <code>script</code> 标签，告诉浏览器"去加载 <code>/src/main.tsx</code> 这个文件来执行"。所以 <strong>HTML 是起点，但代码逻辑从 <code>main.tsx</code> 开始</strong>。</p>
+
+<p>我们跟过去看。</p>
+
+<p><em>（打开 <code>client/src/main.tsx</code>）</em></p>
+
+<pre><code>createRoot(document.getElementById("root")!).render(
+  &lt;App /&gt;
+);</code></pre>
+
+<p>这个文件就做了一件事：在 HTML 里找到那个叫 <code>root</code> 的空容器，然后把 <code>App</code> 这个组件塞进去。页面就出来了。</p>
+
+<p>这里出现了第一个关键概念——<strong><code>import</code></strong>。看文件顶部的这行：</p>
+
+<pre><code>import { App } from "./App";</code></pre>
+
+<p>意思是"从旁边的 <code>App.tsx</code> 文件里，把 <code>App</code> 这个东西拿过来用"。你可以理解为文档里的"参见附件 A"——代码用 import 来引用其他文件的功能。</p>
+
+<h4>穿插讲解：import 的两种写法</h4>
+
+<p>这里顺便讲一下代码里 <code>import</code> 的两种写法，以后你会反复看到：</p>
+
+<blockquote>
+  <p><strong>第一种：<code>./</code> 或 <code>../</code> 开头——自己项目里的文件</strong></p>
+</blockquote>
+
+<pre><code>import { App } from "./App";           // 当前目录下的 App 文件
+import { Message } from "../api";       // 上一级目录的 api 文件</code></pre>
+
+<p><code>.</code> 是"我在的这个文件夹"，<code>..</code> 是"往上走一层"。就像你跟同事说"这个文件夹里的那个文档"、"上一层目录的那个表格"——是相对你当前位置来说的。看到这种写法，你可以直接在项目里找到对应的文件，点过去看源码。</p>
+
+<blockquote>
+  <p><strong>第二种：直接写名字——第三方库</strong></p>
+</blockquote>
+
+<pre><code>import { useState } from "react";</code></pre>
+
+<p>没有 <code>./</code>，直接写名字。这是从<strong>第三方库</strong>里引入的，不是你项目里的文件。</p>
+
+<p>那它在哪？还记得上节课看文件树的时候，有一个叫 <code>node_modules</code> 的文件夹吗？所有第三方库都装在那里面。你执行 <code>npm install</code> 的时候，它就会根据 <code>package.json</code> 里的清单，把需要的库下载到 <code>node_modules</code> 里。</p>
+
+<p>用 Figma 类比的话——你在 Figma 里启用一个团队组件库，然后就能从 Assets 面板里拖组件来用，对吧？你不需要自己画那些组件，别人已经做好了。<code>npm install</code> 就相当于"启用组件库"，<code>node_modules</code> 就是那个 Assets 面板，里面全是别人做好的东西。你 <code>import</code> 一下就能用，不需要知道它内部怎么实现的。</p>
+
+<blockquote>
+  <p>总结一下：<strong><code>./</code> 开头 = 自己的文件，可以点过去看；直接写名字 = 别人的库，不用管。</strong></p>
+</blockquote>
+
+<p>好，回到主线。现在我们知道了：<strong>所有的内容都从 <code>App</code> 开始</strong>。下一步，去看 <code>App.tsx</code>。</p>
+
+<h3><span class="timeline">0:20-0:28</span> 第二步：读根组件 App.tsx</h3>
+
+<p><em>（打开 <code>client/src/App.tsx</code>）</em></p>
+
+<p>这个文件是整个页面的"管家"——数据存在这里，用户操作也在这里处理。</p>
+
+<p>从上往下看。</p>
+
+<h4>状态声明</h4>
+
+<p>先看最前面这两行：</p>
+
+<pre><code>const [messages, setMessages] = useState&lt;Message[]&gt;([]);
+const [loading, setLoading] = useState(false);</code></pre>
+
+<p>这两行是这个组件的<strong>状态（state）</strong>。</p>
+
+<p>什么是状态？你可以把它想成一块<strong>白板</strong>。页面上要显示什么内容、现在处于什么情况，都写在这块白板上。</p>
+
+<ul>
+  <li><code>messages</code>：消息列表，一开始是空的 <code>[]</code>——白板上还没写东西</li>
+  <li><code>loading</code>：正在等回复吗？一开始是 <code>false</code>——没有在等</li>
+</ul>
+
+<p>这两个状态有什么用？<strong>状态一变，页面自动刷新</strong>。你不需要手动去改页面上的文字或者增删元素，只要改白板上的数据，React 会自动帮你重新画页面。这个机制下节课会详细讲，今天先记住这个结论。</p>
+
+<p>另外注意写法：<code>useState</code> 返回的是一对东西——<strong>当前值</strong>和<strong>修改函数</strong>。<code>messages</code> 是当前值，<code>setMessages</code> 是用来改它的函数。想改白板上的内容，必须用 <code>set</code> 开头的那个函数，不能直接改。</p>
+
+<h4>useEffect</h4>
+
+<p>接下来看这一段：</p>
+
+<pre><code>useEffect(() =&gt; {
+  fetchWelcome().then((welcomeText) =&gt; {
+    setMessages([{ role: "assistant", content: welcomeText, ... }]);
+  });
+}, []);</code></pre>
+
+<p>这段代码的意思是：<strong>页面第一次打开的时候，去后端拿欢迎消息，拿到之后放进消息列表里</strong>。</p>
+
+<p><code>useEffect</code> 你可以理解为"页面加载完之后，自动执行的一段代码"。就像你打开一个 App，它会自动帮你加载首页内容——不需要你点任何按钮，打开就开始干活了。</p>
+
+<p>里面的 <code>fetchWelcome()</code> 是什么？上节课我们在 Network 面板里看到过一个 <code>/api/welcome</code> 的请求，对吧？就是这行代码发出去的。我们可以去看看它具体怎么写的。</p>
+
+<p><em>（打开 <code>client/src/api.ts</code>，指向 <code>fetchWelcome</code> 函数）</em></p>
+
+<pre><code>export async function fetchWelcome(): Promise&lt;string&gt; {
+  const response = await fetch("/api/welcome");
+  const data = await response.json();
+  return data.message;
+}</code></pre>
+
+<p>三行核心代码：用 <code>fetch</code> 发一个请求到 <code>/api/welcome</code>，等服务器返回数据，然后把里面的 <code>message</code> 字段取出来。</p>
+
+<p>这里的 <code>await</code> 是什么意思？"等一下"。发请求需要时间，<code>await</code> 就是告诉程序"别急着往下走，等这个请求回来了再继续"。</p>
+
+<p>然后回到 App.tsx——<code>fetchWelcome()</code> 拿到了欢迎文字，<code>.then()</code> 里面用 <code>setMessages</code> 把它写到白板上，页面就自动更新了，你就看到了那条欢迎消息。</p>
+
+<blockquote>
+  <p>你看，我们刚才做的事情就是"顺着数据流走"：<strong>useEffect 触发 → fetchWelcome 发请求 → 后端返回数据 → setMessages 更新白板 → 页面显示欢迎消息</strong>。一条线串起来了。</p>
+</blockquote>
+
+<h4>用 Console 验证</h4>
+
+<p>刚才我们是"看代码猜流程"。现在来验证一下——还记得上节课学的 Console 面板吗？</p>
+
+<p>其实这个项目的代码里已经埋好了 <code>console.log</code>。打开 <code>api.ts</code> 你看：</p>
+
+<pre><code>console.log("[前端] 正在获取欢迎消息...");
+// ...
+console.log("[前端] 收到欢迎消息:", data.message);</code></pre>
+
+<p>这些 <code>console.log</code> 就是代码在"自言自语"——它执行到这一行的时候，会在 Console 面板里打一句话。</p>
+
+<p>现在大家试一下：打开 Demo 项目的页面，按 <code>Cmd+Option+I</code> 打开 DevTools，切到 Console 面板，然后<strong>刷新页面</strong>。</p>
+
+<p><em>（等学员操作）</em></p>
+
+<p>看到了吗？Console 里应该出现了两行：</p>
+
+<pre>[前端] 正在获取欢迎消息...
+[前端] 收到欢迎消息: 你好！我是 Demo 助手，有什么可以帮你的？</pre>
+
+<p>先打了"正在获取"，然后打了"收到了"——跟我们刚才读代码时分析的顺序一模一样。<strong>Console 面板就是帮你验证"代码是不是按照你理解的顺序在跑"的工具。</strong></p>
+
+<p>再试一下：在聊天框里发一条消息，看看 Console 面板又多了什么。</p>
+
+<p><em>（等学员操作）</em></p>
+
+<pre>[前端] 发送消息: 你好
+[前端] 收到回复: 你好呀！很高兴见到你...</pre>
+
+<p>以后你自己读代码时，如果看不懂某个地方的数据是什么，就加一行 <code>console.log("变量名:", 变量)</code> 进去，刷新页面看 Console 面板。这是最简单、最直接的调试方式。</p>
+
+<h4>handleSend</h4>
+
+<p>欢迎消息搞定了。接下来看用户发消息的时候发生了什么——<code>handleSend</code> 函数。</p>
+
+<pre><code>const handleSend = async (text: string) =&gt; {
+  // 1. 先把用户消息加到列表里
+  const userMsg: Message = { role: "user", content: text, ... };
+  setMessages((prev) =&gt; [...prev, userMsg]);
+  setLoading(true);
+
+  // 2. 发请求给后端，等回复
+  const { reply, timestamp } = await sendMessage(text);
+
+  // 3. 把回复加到列表里
+  const assistantMsg: Message = { role: "assistant", content: reply, ... };
+  setMessages((prev) =&gt; [...prev, assistantMsg]);
+  setLoading(false);
+};</code></pre>
+
+<p>这个函数做了三件事，注释里已经写得很清楚了：</p>
+
+<p><strong>第一步</strong>，你点了发送，它立刻把你输入的文字加到消息列表里。<code>setMessages</code> 一调用，白板更新了，页面上马上就多了一条你的消息气泡。同时把 <code>loading</code> 设成 <code>true</code>——"正在等回复"。</p>
+
+<p><strong>第二步</strong>，调 <code>sendMessage(text)</code> 给后端发请求。这个函数也在 <code>api.ts</code> 里，跟刚才的 <code>fetchWelcome</code> 类似，只不过是一个 POST 请求，会把你输入的文字发给服务器。<code>await</code> 在这里等着——等服务器回复。</p>
+
+<p><strong>第三步</strong>，收到回复了，把回复也加到消息列表里。<code>setMessages</code> 再调一次，白板又更新了，页面上多了一条助手的气泡。<code>loading</code> 设回 <code>false</code>——"等完了"。</p>
+
+<blockquote>
+  <p>整个过程就是在反复做同一件事——<strong>改 <code>messages</code> 这个状态</strong>。状态变了，页面就自动更新了。你不需要手动去操作页面上的元素。</p>
+</blockquote>
+
+<p>顺便说一下这里的注释——就是 <code>//</code> 后面那些灰色的文字。注释不会被执行，是写给人看的说明。你们用 Figma 的时候会在设计稿上加批注对吧？比如在一个按钮旁边留一条评论说"这个按钮点击后跳转到设置页"——这条评论不影响设计稿本身，但看到的人立刻就知道这个按钮要干嘛。代码里的注释就是同一个东西。你读代码的时候<strong>先看注释</strong>，很多时候注释已经把这段代码在干嘛写清楚了，比逐行读代码快得多。</p>
+
+<h4>render 部分（JSX）</h4>
+
+<p>最后看 App.tsx 的 <code>return</code> 部分：</p>
+
+<pre><code>return (
+  &lt;div className="app"&gt;
+    &lt;header className="app-header"&gt;
+      &lt;h1&gt;Demo 聊天助手&lt;/h1&gt;
+    &lt;/header&gt;
+    &lt;ChatWindow messages={messages} loading={loading} /&gt;
+    &lt;ChatInput onSend={handleSend} disabled={loading} /&gt;
+  &lt;/div&gt;
+);</code></pre>
+
+<p>这部分描述的是页面长什么样。看起来是不是很像 HTML？这个写法叫 JSX——React 用它来描述页面结构。你可以把它当成 HTML 来读，区别不大。</p>
+
+<p>注意里面有两个自定义组件——<code>ChatWindow</code> 和 <code>ChatInput</code>。什么叫组件？<strong>组件就是一个可复用的页面零件。</strong>按钮是一个零件，输入框是一个零件，整个聊天窗口也是一个零件。你把零件拼起来，就是一个完整的页面。</p>
+
+<p>重点看零件之间是怎么配合的：</p>
+
+<ul>
+  <li><code>ChatWindow</code> 接收了 <code>messages</code> 和 <code>loading</code>——App 把白板上的数据<strong>分享给了</strong> ChatWindow，ChatWindow 拿到数据之后负责画出所有的消息气泡</li>
+  <li><code>ChatInput</code> 接收了 <code>onSend={handleSend}</code>——意思是"用户点发送的时候，调用 App 的 handleSend 函数"。ChatInput 自己不处理发消息的逻辑，它只是<strong>告诉 App"用户点了"</strong>，具体怎么处理是 App 的事</li>
+</ul>
+
+<blockquote>
+  <p>这就是组件之间的分工：<strong>App 是管家，管数据和逻辑；ChatWindow 和 ChatInput 是员工，一个负责展示，一个负责收集用户输入。</strong>管家把数据发给员工，员工把用户的操作汇报给管家。</p>
+</blockquote>
+
+<p><em>（板书画出组件树）</em></p>
+
+<pre>App（管家：管数据、管请求）
+├── ChatWindow（展示：接收 messages，画出所有气泡）
+│   └── MessageBubble（展示：画一条消息）
+└── ChatInput（交互：用户输入，触发 onSend）</pre>
+
+<h4>动手加一个组件</h4>
+
+<p>光看不过瘾，我们来动手加一个自己的组件。</p>
+
+<p>需求很简单：在聊天窗口上方显示"共 X 条消息"。就这么一行字。</p>
+
+<p>第一步，创建组件文件。在 <code>client/src/components/</code> 文件夹下新建一个文件，叫 <code>MessageCount.tsx</code>：</p>
+
+<pre><code>interface MessageCountProps {
+  count: number;
+}
+
+export function MessageCount({ count }: MessageCountProps) {
+  return &lt;div className="message-count"&gt;共 {count} 条消息&lt;/div&gt;;
+}</code></pre>
+
+<p>就这么几行。拆开看：</p>
+<ul>
+  <li>它接收一个 <code>count</code>（数字）——这就是别人传给它的数据</li>
+  <li>它返回一段 JSX，把 <code>count</code> 显示出来</li>
+  <li>大括号 <code>{count}</code> 是 JSX 里插入变量的写法——"这个位置放 count 的值"</li>
+</ul>
+
+<p>第二步，在 App 里用它。打开 <code>App.tsx</code>，先在文件顶部加一行 import：</p>
+
+<pre><code>import { MessageCount } from "./components/MessageCount";</code></pre>
+
+<p>然后在 <code>return</code> 里面，<code>ChatWindow</code> 上面加一行：</p>
+
+<pre><code>&lt;MessageCount count={messages.length} /&gt;</code></pre>
+
+<p><code>messages.length</code> 就是消息列表里有几条消息。我们把这个数字传给了 MessageCount 组件。</p>
+
+<p>第三步，保存，看页面。</p>
+
+<p><em>（等学员操作）</em></p>
+
+<p>看到了吗？上面多了一行"共 1 条消息"——因为有一条欢迎消息。现在发一条消息试试。</p>
+
+<p><em>（发一条消息）</em></p>
+
+<p>变成"共 3 条消息"了——你发了一条，助手回了一条，加上欢迎消息一共三条。你没有写任何"更新数字"的代码，<strong>只是把 <code>messages.length</code> 传给了组件，React 自动帮你更新了</strong>。</p>
+
+<p>现在回头看组件树，你自己加的零件已经拼上去了：</p>
+
+<pre>App（管家）
+├── MessageCount ← 你刚加的！
+├── ChatWindow
+│   └── MessageBubble
+└── ChatInput</pre>
+
+<!-- 0:28-0:35 -->
+<h3><span class="timeline">0:28-0:35</span> 第三步：追一条完整的数据流</h3>
+
+<p>刚才我们一个文件一个文件地看，现在把它们串起来。我们来追踪一个完整的流程——你发一条"你好"，到页面显示回复，中间经过了哪些文件、哪些函数。</p>
+
+<p><em>（边说边在 VS Code 中跳转到对应文件）</em></p>
+
+<p><strong>第一站：ChatInput.tsx</strong></p>
+
+<p>你在输入框打了"你好"，点发送。ChatInput 组件里的 <code>handleSubmit</code> 函数被触发，它调用了 <code>onSend(trimmed)</code>——还记得吗？<code>onSend</code> 是 App 传给它的，实际上就是 App 的 <code>handleSend</code> 函数。所以这一步是<strong>员工向管家汇报："用户发了一条消息"</strong>。</p>
+
+<p><strong>第二站：App.tsx</strong></p>
+
+<p>App 的 <code>handleSend</code> 开始干活。先用 <code>setMessages</code> 把你的消息加到列表里——页面上立刻多了一条气泡。然后调 <code>sendMessage(text)</code> 发请求。</p>
+
+<p><strong>第三站：api.ts</strong></p>
+
+<p><code>sendMessage</code> 用 <code>fetch</code> 发了一个 POST 请求到 <code>/api/chat</code>，把你输入的"你好"装在请求体里发给后端。<code>await</code> 等着——等后端回复。</p>
+
+<p><strong>第四站：后端（server/index.ts → replies.ts）</strong></p>
+
+<p>请求到了后端。后端怎么处理的我们第 4 课会详细讲，今天你只需要知道：它收到了"你好"，匹配了一条回复，然后把回复作为 JSON 返回给前端。你可以打开 <code>replies.ts</code> 看看那个关键词列表——这就是它"选回复"的逻辑。</p>
+
+<p><strong>第五站：回到 api.ts → App.tsx</strong></p>
+
+<p>前端收到了后端的 JSON 响应，<code>sendMessage</code> 把 <code>reply</code> 和 <code>timestamp</code> 返回给 App。App 的 <code>handleSend</code> 用 <code>setMessages</code> 把这条回复也加到消息列表里——页面上又多了一条气泡。</p>
+
+<p>整条线串起来了：</p>
+
+<pre>ChatInput → App → api.ts → 后端 → api.ts → App → ChatWindow</pre>
+
+<blockquote>
+  <p><strong>以后遇到 bug，你就沿着这条线找。</strong>页面上没出现气泡？检查 App 的 <code>setMessages</code> 有没有被调用。请求发了但没回复？打开 Network 面板看请求状态。回复内容不对？去 <code>replies.ts</code> 看匹配规则。每次只需要在这条线上定位到出问题的那一站就行了。</p>
+</blockquote>
+
+<!-- 0:35-0:40 -->
+<h2><span class="timeline">0:35-0:40</span> JS 和 React 的关系 + 速查卡</h2>
+
+<h3>JS 和 React 的关系</h3>
+
+<p>在发速查卡之前，先聊一个你们可能已经困惑的问题：我一会儿说 JavaScript，一会儿说 React，它俩到底什么关系？</p>
+
+<blockquote>
+  <p><strong>JavaScript 是语言，React 是工具。</strong></p>
+</blockquote>
+
+<p>打个比方：JavaScript 就像"中文"，React 就像"飞书文档"。你用中文写东西，这是语言层面的能力——语法、词汇、表达方式。飞书文档是一个工具，它帮你把中文内容组织成有结构的文档——标题、正文、表格、评论。你得会中文才能用飞书文档，但会中文不代表你一定要用飞书文档，你也可以用 Word、用 Notion。</p>
+
+<p>代码也一样。<code>const</code>、<code>function</code>、<code>if</code>、<code>await</code> 这些是 JavaScript 语言自带的——换任何框架都长这样。而 <code>useState</code>、<code>useEffect</code>、<code>&lt;组件名 /&gt;</code> 这些是 React 这个工具提供的——只有用 React 写项目时才会出现。</p>
+
+<p>所以速查卡我分了两块：上面是 JS 通用的，下面是 React 特有的。以后你看到不认识的写法，先判断它是语言层面的还是框架层面的，搜的时候更容易找到答案。</p>
+
+<h3>速查卡</h3>
+
+<p><em>（投屏展示，同时发群里）</em></p>
+
+<h4>JavaScript 基础</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>写法</th>
+      <th>含义</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>import ... from "..."</code></td>
+      <td>从别的文件引入功能，像"参见附件"</td>
+    </tr>
+    <tr>
+      <td><code>export function Xxx()</code></td>
+      <td>把这个函数公开，让别的文件能 import</td>
+    </tr>
+    <tr>
+      <td><code>const x = 值</code></td>
+      <td>声明一个变量（一个有名字的盒子）</td>
+    </tr>
+    <tr>
+      <td><code>函数名(参数)</code></td>
+      <td>调用函数（让它执行）</td>
+    </tr>
+    <tr>
+      <td><code>async / await</code></td>
+      <td>等待一个需要时间的操作（比如网络请求）</td>
+    </tr>
+    <tr>
+      <td><code>.then(callback)</code></td>
+      <td>另一种等待方式，"等结果出来后执行 callback"</td>
+    </tr>
+    <tr>
+      <td><code>// 注释内容</code></td>
+      <td>给人看的说明，代码不会执行</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4>React 特有</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>写法</th>
+      <th>含义</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>&lt;组件名 属性={值} /&gt;</code></td>
+      <td>使用一个组件，给它传数据（叫 props）</td>
+    </tr>
+    <tr>
+      <td><code>useState(初始值)</code></td>
+      <td>声明一个状态，返回 [当前值, 修改函数]</td>
+    </tr>
+    <tr>
+      <td><code>useEffect(() =&gt; {}, [])</code></td>
+      <td>页面加载后执行一次的代码</td>
+    </tr>
+    <tr>
+      <td><code>{条件 &amp;&amp; &lt;元素&gt;}</code></td>
+      <td>条件为真时才显示这个元素</td>
+    </tr>
+    <tr>
+      <td><code>{数组.map(item =&gt; ...)}</code></td>
+      <td>把数组里的每一项变成一个页面元素</td>
+    </tr>
+    <tr>
+      <td><code>console.log(值)</code></td>
+      <td>在 Console 面板里打印内容，用来调试</td>
+    </tr>
+  </tbody>
+</table>
+
+<blockquote>
+  <p><strong>不需要背。</strong>这张卡的用法是——你在读代码时碰到一个看不懂的写法，来查一下，知道它大概干嘛的就行。用多了自然就记住了。</p>
+</blockquote>
+
+<!-- 0:40-0:50 -->
+<h2><span class="timeline">0:40-0:50</span> 动手环节</h2>
+
+<p>现在换你们来。我们从具体的问题出发——带着问题读代码，比漫无目的地看有效得多。</p>
+
+<p><em>（发到群里）</em></p>
+
+<div class="task-list">
+  <h4>任务 1（热身）</h4>
+  <p>欢迎消息"你好！我是 Demo 助手，有什么可以帮你的？"写在哪个文件的第几行？</p>
+</div>
+
+<div class="task-list">
+  <h4>任务 2（追数据流）</h4>
+  <p>你在聊天框里输入"天气"，点发送。请你从 ChatInput.tsx 出发，一步一步追踪这条消息经过了哪些文件、哪些函数，最终回复是怎么生成的。</p>
+  <p>回答格式：</p>
+  <ul>
+    <li>第一步：ChatInput.tsx 的 ______ 函数被调用，它做了 ______</li>
+    <li>第二步：跳到 ______ 文件的 ______ 函数，它做了 ______</li>
+    <li>...一直追到最终生成回复的地方</li>
+  </ul>
+  <p>最后写出：页面上会显示什么回复内容？</p>
+</div>
+
+<div class="task-list">
+  <h4>任务 3（理解组件）</h4>
+  <p>MessageBubble 组件怎么判断一条消息是"用户发的"还是"助手回的"？它们在页面上有什么区别？（提示：看 className）</p>
+</div>
+
+<div class="task-list">
+  <h4>任务 4（加分）</h4>
+  <p>如果我想加一个功能——用户发送"历史"这个关键词时，返回"你一共发了 X 条消息"。应该改哪个文件的哪个地方？不需要真的改，描述你的思路就行。</p>
+</div>
+
+<p>给你们一个小技巧：VS Code 里按 <code>Cmd+Shift+F</code>，可以在所有文件里搜索关键词。比如任务 1，直接搜"Demo 助手"就能找到那行代码在哪。这是读代码时最实用的功能，以后会经常用到。</p>
+
+<p><em>（让学员操作，巡视帮助）</em></p>
+
+<!-- 0:50-1:00 -->
+<h2><span class="timeline">0:50-1:00</span> 答疑 + 作业 + 预告</h2>
+
+<p>今天的内容就到这里。总结一下，今天就学了一个方法：<strong>找入口，顺着数据流走</strong>。</p>
+
+<p>再重复一下步骤：</p>
+<ol>
+  <li>找到入口文件——打开 <code>index.html</code>，看 <code>&lt;script&gt;</code> 指向谁</li>
+  <li>看入口引用了谁——顺着 <code>import</code> 一路点过去</li>
+  <li>带着具体的问题，沿着数据流追踪：用户操作 → 函数 → 请求 → 响应 → 状态更新 → 页面刷新</li>
+</ol>
+
+<blockquote>
+  <p>你不需要每行代码都看懂。<strong>读代码是为了回答一个具体的问题</strong>——"这个按钮点了之后调了哪个接口？""这段文字是从哪里来的？"有了问题，你才知道该追哪条线。</p>
+</blockquote>
+
+<p>有什么问题吗？</p>
+
+<p><em>（回答问题，处理方式同第一课）</em></p>
+
+<p>好，布置作业。</p>
+
+<p><em>（发到群里）</em></p>
+
+<div class="task-list">
+  <h4>第 2 课作业：读代码回答问题</h4>
+  <p>打开你自己的 vibe coding 项目（或 Demo 项目），回答以下问题：</p>
+  <ol>
+    <li>找到你项目的入口文件是哪个，截图或写出文件路径</li>
+    <li>从入口文件出发，画出你项目的组件树（格式不限：文本缩进、手绘拍照、任何方式都行）</li>
+    <li>挑一个你项目里的用户交互（比如点按钮、提交表单），像课上一样追踪它的数据流，写出每一步经过了哪个文件、哪个函数</li>
+  </ol>
+  <p>提交方式：放到 <code>homework/你的文件夹/</code> 下，文件名建议 <code>lesson-2-read-code.md</code></p>
+</div>
+
+<h3>预告下节课</h3>
+
+<p>下节课我们讲 <strong>React 的心智模型</strong>——组件、状态、渲染。今天我们已经看到了 <code>useState</code>、props、组件树这些东西，下节课把它们讲透：为什么状态一变页面就更新？props 到底是怎么传的？搞懂这些，你就能看懂 AI 写的绝大部分 React 代码了。</p>
+
+<div class="footer">
+  <p>编程入门课程 &copy; 2026</p>
+</div>
+
+</div>
+</body>
+</html>
