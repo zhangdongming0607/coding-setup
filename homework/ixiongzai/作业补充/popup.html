@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>划词收藏到 Notion</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      width: 320px;
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #ffffff;
+    }
+    
+    .header {
+      margin-bottom: 20px;
+    }
+    
+    .header h1 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #111827;
+      margin-bottom: 4px;
+    }
+    
+    .header p {
+      font-size: 14px;
+      color: #6b7280;
+    }
+    
+    .status {
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-size: 14px;
+    }
+    
+    .status.configured {
+      background: #d1fae5;
+      color: #065f46;
+      border: 1px solid #10b981;
+    }
+    
+    .status.not-configured {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #ef4444;
+    }
+    
+    .btn {
+      width: 100%;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: block;
+      text-align: center;
+    }
+    
+    .btn-primary {
+      background: #2563eb;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #1d4ed8;
+    }
+    
+    .btn-secondary {
+      background: #f3f4f6;
+      color: #374151;
+      margin-top: 8px;
+    }
+    
+    .btn-secondary:hover {
+      background: #e5e7eb;
+    }
+    
+    .instructions {
+      margin-top: 16px;
+      padding: 12px;
+      background: #f9fafb;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #4b5563;
+      line-height: 1.6;
+    }
+    
+    .instructions h3 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #111827;
+      margin-bottom: 8px;
+    }
+    
+    .instructions ol {
+      margin-left: 20px;
+    }
+    
+    .instructions li {
+      margin-bottom: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>划词收藏到 Notion</h1>
+    <p>选中文本，一键保存</p>
+  </div>
+  
+  <div id="status" class="status not-configured">
+    正在检查配置...
+  </div>
+  
+  <button id="openOptions" class="btn btn-primary">配置插件</button>
+  
+  <div id="debugSection" style="display: none; margin-top: 16px;">
+    <button id="testPingBtn" class="btn btn-secondary" style="display: none; margin-top: 8px; background: #f59e0b; color: white;">测试 Service Worker</button>
+    <button id="syncTagsBtn" class="btn btn-secondary" style="margin-top: 8px;">同步标签</button>
+    <div id="tagsInfo" style="margin-top: 12px; padding: 12px; background: #f9fafb; border-radius: 8px; font-size: 12px; color: #4b5563;">
+      <div style="font-weight: 600; margin-bottom: 8px;">标签信息：</div>
+      <div id="tagsList">加载中...</div>
+    </div>
+    <div id="testResult" style="margin-top: 8px; padding: 8px; background: #f9fafb; border-radius: 6px; font-size: 11px; color: #4b5563; display: none;">
+      <div style="font-weight: 600; margin-bottom: 4px;">测试结果：</div>
+      <div id="testResultContent"></div>
+    </div>
+  </div>
+  
+  <div class="instructions">
+    <h3>使用说明</h3>
+    <ol>
+      <li>在网页上选中文本</li>
+      <li>点击浮层中的"收藏"按钮</li>
+      <li>内容会自动保存到 Notion</li>
+    </ol>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>
+
