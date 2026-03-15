@@ -40,11 +40,11 @@
 
 <p>格式不限——文本缩进、手绘拍照、用任何你顺手的工具都行。参考格式：</p>
 
-<pre><code>App（管家：管数据、管请求）
-├── Header（展示：显示标题）
-├── ChatWindow（展示：接收 messages，画出所有气泡）
-│   └── MessageBubble（展示：画一条消息）
-└── ChatInput（交互：用户输入，触发 onSend）</code></pre>
+<pre><code>App（管家：管数据、管逻辑）
+├── SearchBar（交互：用户输入关键词，触发搜索）
+├── ProductList（展示：接收商品数据，渲染列表）
+│   └── ProductCard（展示：显示单个商品信息）
+└── ShoppingCart（展示+交互：显示已选商品，可删除）</code></pre>
 </div>
 
 <!-- 任务 3 -->
