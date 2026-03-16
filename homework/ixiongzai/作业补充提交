@@ -1,0 +1,49 @@
+
+
+## 任务 1：看看你的页面发了哪些请求
+
+1. 共 23 requests
+2. 找到的 API 请求：welcome
+response 返回的数据：{"message":"你好！我是 Demo 助手，有什么可以帮你的？"}
+![alt text](image-1.png)
+
+
+## 任务 2：触发一个错误请求
+
+1. 输入错误之后，多了个 叉号+chat；状态码500；颜色是红色
+![alt text](image-2.png)
+输入你好之后，返回 chat；状态码200；颜色正常
+![alt text](image-3.png)
+
+2. 对比两次请求的区别
+正常的内容，显示绿点，200 ok
+![alt text](image-4.png)
+错误内容，显示红点，500 并说明服务器错误
+![alt text](image-5.png)
+
+## 任务 3：画一张"项目地图"
+前端
+| 文件 | 类型 | 内容 |
+| --- | --- | --- |
+| src |  | |
+| comoinents | 前端组件| 放各种组件的文件夹 |
+| ChatInput | 前端组件| 对话输入框 |
+| ChatWindow | 前端组件| 对话的视窗 |
+| api.ts | 前端文件 | 前端向后端请求的api内容|
+| App.tsx | 前端文件 | 放整个页面的交互链路信息，包含定义交互是什么、需要展示什么等内容|
+| main.tsx | 前端文件 | 启动整体项目的文件
+| styles.css | 前端文件 | 存放前端的样式内容 |
+| index.html | 前端文件 | 浏览器最先加载的文件，指引后续需要加载哪些东西 |
+| package-lock.json | 配置文件 | 感觉和 package.json 类似 |
+| package.json| 配置文件 | 类似工具包，说明用了哪些框架、或者组件 |
+| tsconfig.json| 配置文件 | 不太懂，问了一下AI老师：TypeScript 编译设置 |
+| vite.config.ts | 配置文件 | 不太懂，问了一下AI老师：TVite 打包工具设置，包含代理转发到后端 |
+
+后端
+| 文件 | 类型 | 内容 |
+| --- | --- | --- |
+| index.ts | 后端文件 | 接收前端请求并返回数据，类似个传送带 |
+| package-lock.json | 配置文件 | 感觉和 package.json 类似 |
+| package.json| 配置文件 | 类似工具包，说明用了哪些后端工具 |
+| replies.ts | 后端文件 | 存放返回的数据内容 |
+| tsconfig.json | 配置文件 | 不太懂，问了一下AI老师：TypeScript 编译设置 |
