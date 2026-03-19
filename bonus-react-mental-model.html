@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>番外：React 心智模型 — 给设计师和 PM 的形象解释</title>
+<link rel="stylesheet" href="style.css">
+<style>
+/* ===== Demo 通用 ===== */
+.demo-box {
+  background: #fff;
+  border: 2px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 16px;
+}
+.demo-box h4 { margin-top: 0; font-size: 0.9em; color: #888; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; }
+.demo-label {
+  display: inline-block;
+  font-size: 0.75em;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 20px;
+  margin-bottom: 12px;
+}
+.demo-label.interactive { background: #dcfce7; color: #166534; }
+.demo-label.concept    { background: #ede9fe; color: #5b21b6; }
+
+/* ===== 气泡 ===== */
+.bubble-row { display: flex; align-items: flex-end; gap: 8px; margin-bottom: 10px; }
+.bubble-row.user-row { flex-direction: row-reverse; }
+.avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75em; font-weight: 700; flex-shrink: 0;
+}
+.avatar.ai  { background: #e0e7ff; color: #3730a3; }
+.avatar.me  { background: #fce7f3; color: #9d174d; }
+.bubble {
+  max-width: 70%; padding: 10px 14px; border-radius: 18px;
+  font-size: 0.95em; line-height: 1.5;
+}
+.bubble.ai-bubble  { background: #f1f5f9; color: #1a1b1d; border-bottom-left-radius: 4px; }
+.bubble.me-bubble  { background: #6366f1; color: #fff; border-bottom-right-radius: 4px; }
+
+.highlight-component {
+  outline: 2px dashed #6366f1;
+  outline-offset: 4px;
+  border-radius: 20px;
+  transition: outline 0.2s;
+}
+
+/* ===== Props Demo ===== */
+.props-playground {
+  display: grid; grid-template-columns: 200px 1fr; gap: 0;
+  border: 1.5px solid #e2e8f0; border-radius: 12px; overflow: hidden;
+}
+@media (max-width: 600px) { .props-playground { grid-template-columns: 1fr; } }
+
+/* 左侧：Figma 风格 Properties Panel */
+.props-panel {
+  background: #1e1e2e; border-right: 1.5px solid #2d2d3e;
+  padding: 12px 0; display: flex; flex-direction: column; gap: 0;
+}
+.props-panel-title {
+  font-size: 0.72em; font-weight: 600; color: #6b7280; letter-spacing: 0.08em;
+  text-transform: uppercase; padding: 0 14px 10px; border-bottom: 1px solid #2d2d3e;
+  margin-bottom: 4px;
+}
+.props-row {
+  padding: 8px 14px; display: flex; flex-direction: column; gap: 6px;
+}
+.props-row-label {
+  font-size: 0.72em; color: #9ca3af; font-weight: 500;
+}
+/* 滑块式 segmented control */
+.seg-ctrl {
+  display: flex; background: #2d2d3e; border-radius: 6px; padding: 2px; gap: 0; position: relative;
+}
+.seg-btn {
+  flex: 1; padding: 5px 6px; border: none; background: transparent;
+  font-size: 0.75em; font-weight: 500; color: #9ca3af; cursor: pointer;
+  border-radius: 4px; transition: color 0.15s; position: relative; z-index: 1;
+  text-align: center; white-space: nowrap;
+}
+.seg-btn.active { color: #f8fafc; }
+.seg-slider {
+  position: absolute; top: 2px; bottom: 2px;
+  background: #6366f1; border-radius: 4px;
+  transition: left 0.2s cubic-bezier(0.4, 0, 0.2, 1), width 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+/* content 选项列表 */
+.content-options { display: flex; flex-direction: column; gap: 2px; }
+.content-opt {
+  padding: 5px 8px; border-radius: 5px; border: none; background: transparent;
+  font-size: 0.78em; color: #9ca3af; cursor: pointer; text-align: left;
+  transition: background 0.12s, color 0.12s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.content-opt:hover  { background: #2d2d3e; color: #e2e8f0; }
+.content-opt.active { background: #3730a3; color: #c7d2fe; font-weight: 600; }
+
+/* 右侧：画布 */
+.props-canvas {
+  background: #f0f2f5;
+  background-image: radial-gradient(#d1d5db 1px, transparent 1px);
+  background-size: 16px 16px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 24px 20px; min-height: 140px; position: relative;
+}
+.canvas-label {
+  position: absolute; top: 8px; left: 12px;
+  font-size: 0.7em; color: #9ca3af; font-weight: 500; letter-spacing: 0.04em;
+}
+/* 气泡过渡 */
+#props-preview-row {
+  transition: opacity 0.18s ease, transform 0.18s cubic-bezier(0.34,1.56,0.64,1);
+}
+#props-preview-row.changing {
+  opacity: 0; transform: scale(0.94) translateY(4px);
+}
+
+.props-meta {
+  margin-top: 0; padding: 8px 14px;
+  background: #1e1e2e; font-size: 0.78em; color: #9ca3af;
+  line-height: 1.8; border-top: 1.5px solid #2d2d3e;
+  font-family: "SF Mono", Menlo, monospace;
+  grid-column: 1 / -1;
+}
+.props-meta .pk { color: #93c5fd; }
+.props-meta .pv { color: #86efac; }
+
+/* ===== State Demo ===== */
+.state-demos { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 600px) { .state-demos { grid-template-columns: 1fr; } }
+
+.whiteboard {
+  background: #f0fdf4; border: 2px solid #86efac;
+  border-radius: 12px; padding: 12px 16px; margin-top: 14px;
+  font-size: 0.85em;
+}
+.whiteboard .wb-label { color: #16a34a; font-weight: 700; margin-bottom: 4px; font-size: 0.88em; }
+.whiteboard .wb-value { font-size: 1.2em; font-weight: 700; color: #15803d; }
+
+/* 灯泡 */
+.bulb-wrap { text-align: center; margin: 8px 0; }
+.bulb { font-size: 3em; transition: filter 0.3s, transform 0.2s; display: inline-block; }
+.bulb.off { filter: grayscale(1) brightness(0.6); }
+.bulb.on  { filter: drop-shadow(0 0 12px #fbbf24); transform: scale(1.1); }
+.bulb-btn {
+  display: block; margin: 8px auto 0; padding: 8px 24px; border-radius: 8px; border: none;
+  font-size: 0.9em; font-weight: 600; cursor: pointer;
+  background: #6366f1; color: #fff; transition: background 0.15s;
+}
+.bulb-btn:hover { background: #4f46e5; }
+
+/* 计数器 */
+.counter-wrap { display: flex; align-items: center; gap: 12px; justify-content: center; margin: 8px 0; }
+.counter-num { font-size: 2.5em; font-weight: 700; color: #1a1b1d; min-width: 60px; text-align: center; transition: transform 0.15s; }
+.counter-btn {
+  width: 40px; height: 40px; border-radius: 50%; border: none;
+  font-size: 1.3em; font-weight: 700; cursor: pointer;
+  background: #6366f1; color: #fff; transition: background 0.15s;
+}
+.counter-btn:hover { background: #4f46e5; }
+
+/* 对比 Demo */
+.compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+@media (max-width: 600px) { .compare-grid { grid-template-columns: 1fr; } }
+.compare-box { border-radius: 12px; padding: 16px; text-align: center; }
+.compare-box.wrong { background: #fef2f2; border: 2px solid #fca5a5; }
+.compare-box.right { background: #f0fdf4; border: 2px solid #86efac; }
+.compare-box h5 { margin: 0 0 4px; font-size: 0.85em; }
+.compare-num { font-size: 2.2em; font-weight: 700; margin: 8px 0; transition: transform 0.15s, color 0.15s; }
+.compare-btn {
+  padding: 6px 18px; border-radius: 8px; border: none;
+  font-size: 0.85em; font-weight: 600; cursor: pointer; margin-top: 4px;
+}
+.compare-box.wrong .compare-btn { background: #fee2e2; color: #991b1b; }
+.compare-box.right .compare-btn { background: #dcfce7; color: #166534; }
+.compare-badge { font-size: 0.75em; padding: 2px 8px; border-radius: 4px; margin-bottom: 8px; display: inline-block; }
+.compare-box.wrong .compare-badge { background: #fee2e2; color: #b91c1c; }
+.compare-box.right .compare-badge { background: #dcfce7; color: #166534; }
+.compare-note { font-size: 0.78em; margin: 6px 0 0; }
+.compare-box.wrong .compare-note { color: #991b1b; }
+.compare-box.right .compare-note { color: #166534; }
+
+/* ===== 渲染流程步进 ===== */
+.render-steps { display: flex; flex-direction: column; gap: 0; }
+.render-step {
+  display: flex; align-items: flex-start; gap: 16px;
+  padding: 14px 0; opacity: 0.25; transition: opacity 0.4s;
+  position: relative;
+}
+.render-step.active { opacity: 1; }
+.render-step::before {
+  content: '';
+  position: absolute; left: 19px; top: 40px; bottom: -14px;
+  width: 2px; background: #e5e7eb;
+}
+.render-step:last-child::before { display: none; }
+.step-dot {
+  width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 0.9em;
+  border: 2px solid #e5e7eb; background: #fff; color: #aaa;
+  transition: all 0.4s;
+}
+.render-step.active .step-dot {
+  border-color: #6366f1; background: #6366f1; color: #fff;
+}
+.step-text { padding-top: 8px; }
+.step-text strong { display: block; margin-bottom: 2px; }
+.step-text p { color: #666; font-size: 0.88em; margin: 0; line-height: 1.5; }
+.render-controls { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+.render-btn {
+  padding: 8px 20px; border-radius: 8px; border: none;
+  font-size: 0.88em; font-weight: 600; cursor: pointer;
+  background: #6366f1; color: #fff; transition: background 0.15s;
+}
+.render-btn:hover { background: #4f46e5; }
+.render-btn.secondary { background: #f1f5f9; color: #555; }
+.render-btn.secondary:hover { background: #e2e8f0; }
+
+/* ===== 综合架构图 ===== */
+.arch-node {
+  border-radius: 12px; padding: 16px 20px;
+}
+.arch-node.manager { background: #ede9fe; border: 2px solid #a78bfa; }
+.node-title { font-weight: 700; font-size: 1em; margin-bottom: 8px; }
+.node-state {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #fff; border: 1px solid #ddd6fe; border-radius: 8px;
+  padding: 4px 10px; font-size: 0.83em; margin-right: 6px; margin-bottom: 4px;
+}
+.state-dot { width: 8px; height: 8px; border-radius: 50%; background: #7c3aed; flex-shrink: 0; }
+
+.arch-children { display: flex; gap: 12px; margin-top: 4px; }
+@media (max-width: 600px) { .arch-children { flex-direction: column; } }
+.arch-child { flex: 1; border-radius: 10px; padding: 12px 14px; font-size: 0.85em; }
+.arch-child.display  { background: #e0f2fe; border: 2px solid #7dd3fc; }
+.arch-child.interact { background: #fef9c3; border: 2px solid #fde047; }
+.child-title { font-weight: 700; margin-bottom: 6px; }
+.props-tag {
+  display: inline-flex; align-items: center;
+  background: rgba(255,255,255,0.7); border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 6px; padding: 2px 8px; font-size: 0.82em; margin: 2px;
+  font-family: "SF Mono", Menlo, monospace;
+}
+.arrow-label {
+  text-align: center; padding: 10px 0; font-size: 0.83em; color: #888;
+}
+.arrow-label .arr { font-size: 1.3em; display: block; line-height: 1; margin-bottom: 2px; }
+
+.legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 14px; font-size: 0.82em; }
+.legend-item { display: flex; align-items: center; gap: 6px; }
+.legend-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+
+/* ===== 总结卡 ===== */
+.summary-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+@media (max-width: 600px) { .summary-cards { grid-template-columns: 1fr; } }
+.summary-card { border-radius: 14px; padding: 20px; }
+.summary-card.c-comp  { background: #ede9fe; }
+.summary-card.c-props { background: #e0f2fe; }
+.summary-card.c-state { background: #f0fdf4; }
+.card-icon { font-size: 2em; margin-bottom: 8px; }
+.summary-card h4 { margin: 0 0 8px; font-size: 1em; }
+.summary-card p { font-size: 0.85em; color: #444; margin: 0 0 6px; }
+.card-analogy { font-size: 0.8em; color: #666; font-style: italic; }
+
+/* ===== Component Layers playground ===== */
+.comp-playground {
+  display: grid; grid-template-columns: 220px 1fr; gap: 0;
+  border: 1.5px solid #e2e8f0; border-radius: 12px; overflow: hidden;
+}
+@media (max-width: 600px) { .comp-playground { grid-template-columns: 1fr; } }
+.layers-panel {
+  background: #1e1e2e; padding: 10px 0; overflow-y: auto;
+}
+.layers-title {
+  font-size: 0.7em; font-weight: 600; color: #6b7280; letter-spacing: 0.08em;
+  text-transform: uppercase; padding: 0 12px 8px; border-bottom: 1px solid #2d2d3e; margin-bottom: 2px;
+}
+/* generic row */
+.lr {
+  display: flex; align-items: center; gap: 5px;
+  padding: 3px 10px; font-size: 0.75em; color: #9ca3af;
+  cursor: pointer; transition: background 0.1s, color 0.1s; white-space: nowrap;
+  user-select: none;
+}
+.lr:hover   { background: #2d2d3e; color: #e2e8f0; }
+.lr.sel     { background: #312e81; color: #c7d2fe; }
+/* indentation */
+.lr.d1 { padding-left: 10px; }
+.lr.d2 { padding-left: 22px; }
+.lr.d3 { padding-left: 34px; }
+/* toggle arrow */
+.lt { font-size: 0.65em; color: #4b5563; width: 10px; flex-shrink: 0; transition: transform 0.15s; }
+.lr.open > .lt { transform: rotate(90deg); }
+/* layer type icons */
+.li-comp  { color: #a78bfa; font-size: 0.8em; flex-shrink: 0; }  /* ◆ master */
+.li-inst  { color: #818cf8; font-size: 0.8em; flex-shrink: 0; }  /* ◇ instance */
+.li-frame { display:inline-flex; align-items:center; justify-content:center;
+            width:13px; height:11px; border:1.5px solid #4b5563; border-radius:2px;
+            font-size:0; flex-shrink:0; }
+.lr.sel .li-frame { border-color: #a78bfa; }
+.li-text  { display:inline-flex; align-items:center; justify-content:center;
+            width:13px; height:13px; background:#374151; border-radius:2px;
+            font-size:0.65em; font-weight:800; color:#93c5fd; flex-shrink:0;
+            font-family: serif; font-style: italic; line-height:1; }
+.lr.sel .li-text { background: #4338ca; color: #c7d2fe; }
+/* layer name */
+.ln { overflow: hidden; text-overflow: ellipsis; flex:1; }
+/* sub-rows (children) hidden by default */
+.lr-children { display: none; }
+.lr-children.open { display: block; }
+
+.comp-canvas {
+  background: #f0f2f5;
+  background-image: radial-gradient(#d1d5db 1px, transparent 1px);
+  background-size: 16px 16px;
+  padding: 20px; position: relative; display: flex; flex-direction: column; gap: 0;
+}
+.bubble-row.hl {
+  outline: 2px solid #6366f1; outline-offset: 5px; border-radius: 20px;
+  transition: outline 0.15s;
+}
+
+/* ===== State playground (panel + canvas, same layout as Props) ===== */
+.state-playground {
+  display: grid; grid-template-columns: 170px 1fr; gap: 0;
+  border: 1.5px solid #e2e8f0; border-radius: 12px; overflow: hidden; margin-bottom: 16px;
+}
+@media (max-width: 600px) { .state-playground { grid-template-columns: 1fr; } }
+.state-panel {
+  background: #1e1e2e; padding: 12px 0;
+}
+.state-panel-title {
+  font-size: 0.7em; font-weight: 600; color: #6b7280; letter-spacing: 0.08em;
+  text-transform: uppercase; padding: 0 14px 10px; border-bottom: 1px solid #2d2d3e; margin-bottom: 6px;
+}
+.state-var-row {
+  padding: 6px 12px; display: flex; align-items: center; gap: 5px; margin: 2px 4px;
+  border-radius: 5px; font-family: "SF Mono", Menlo, monospace; font-size: 0.82em;
+  transition: background 0.1s;
+}
+.state-var-row.flashing { background: rgba(251,191,36,0.2); }
+.sv-name { color: #c4b5fd; }
+.sv-eq   { color: #6b7280; }
+.sv-val  { color: #86efac; font-weight: 700; transition: color 0.1s; }
+.state-canvas {
+  background: #f0f2f5;
+  background-image: radial-gradient(#d1d5db 1px, transparent 1px);
+  background-size: 16px 16px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 24px 20px; min-height: 130px; position: relative;
+}
+
+/* ===== useEffect playground ===== */
+.effect-playground {
+  display: grid; grid-template-columns: 210px 1fr; gap: 0;
+  border: 1.5px solid #e2e8f0; border-radius: 12px; overflow: hidden;
+}
+@media (max-width: 600px) { .effect-playground { grid-template-columns: 1fr; } }
+.effect-panel {
+  background: #1e1e2e; padding: 12px 0;
+}
+.effect-panel-title {
+  font-size: 0.7em; font-weight: 600; color: #6b7280; letter-spacing: 0.08em;
+  text-transform: uppercase; padding: 0 14px 10px; border-bottom: 1px solid #2d2d3e; margin-bottom: 6px;
+}
+.effect-trigger-badge {
+  display: inline-block; margin: 4px 14px 8px;
+  background: #4c1d95; color: #c4b5fd; border-radius: 4px;
+  padding: 3px 10px; font-size: 0.78em; font-weight: 700;
+}
+.effect-log-line {
+  display: flex; align-items: center; gap: 7px;
+  padding: 4px 14px; font-size: 0.75em; color: #4b5563;
+  font-family: "SF Mono", Menlo, monospace; transition: color 0.2s;
+}
+.effect-log-line.active { color: #fbbf24; }
+.effect-log-line.done   { color: #86efac; }
+.elog-dot {
+  width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+  background: #374151; transition: background 0.2s;
+}
+.effect-log-line.active .elog-dot { background: #fbbf24; }
+.effect-log-line.done   .elog-dot { background: #86efac; }
+.effect-canvas {
+  background: #f0f2f5;
+  background-image: radial-gradient(#d1d5db 1px, transparent 1px);
+  background-size: 16px 16px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 24px 20px; position: relative;
+}
+.effect-frame {
+  background: #fff; border-radius: 10px; padding: 16px 24px; text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08); min-width: 200px;
+}
+.effect-frame-label {
+  font-size: 0.7em; color: #9ca3af; font-family: monospace; margin-bottom: 10px;
+}
+
+/* ===== Render live trigger ===== */
+.render-trigger {
+  display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+  background: #f5f3ff; border: 1.5px solid #ddd6fe; border-radius: 12px;
+  padding: 16px 20px; margin-bottom: 20px;
+}
+.render-trigger-desc { font-size: 0.82em; color: #6b7280; margin-bottom: 8px; }
+.render-live-count { font-size: 2.2em; font-weight: 700; color: #1a1b1d; min-width: 48px; text-align: center; }
+.render-trigger-hint { font-size: 0.78em; color: #7c3aed; }
+
+/* ===== code details ===== */
+details { margin-top: 12px; }
+details summary {
+  cursor: pointer; font-size: 0.85em; color: #6366f1; font-weight: 600;
+  padding: 8px 12px; background: #f0f0ff; border-radius: 8px;
+  list-style: none; display: flex; align-items: center; gap: 6px;
+  user-select: none;
+}
+details summary::-webkit-details-marker { display: none; }
+details summary::before { content: '▶'; font-size: 0.7em; transition: transform 0.2s; }
+details[open] summary::before { transform: rotate(90deg); }
+details pre { margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<nav class="nav">
+  <a href="index.html" class="nav-back">&larr; 课程首页</a>
+  <a href="lesson-2.html">&larr; 第 2 课</a>
+</nav>
+
+<h1>番外：React 心智模型</h1>
+<p class="subtitle">参考 Figma 的操作逻辑，建立 React 的直觉</p>
+
+<div class="card" style="background:#ede9fe;border:none;box-shadow:none;">
+  <p>第 2 课读代码时，你一定遇到了 <code>useState</code>、props、组件……</p>
+  <p style="margin:0;"><strong>React 的核心就 3 件事：组件 / Props / State。</strong>搞懂这三个，能看懂 AI 写的 90% 的前端代码。</p>
+</div>
+
+<!-- ===================== 1. 组件 ===================== -->
+<h2>一、组件 = Figma 的 Master Component</h2>
+
+<p>你在 Figma 里一定做过这件事——</p>
+
+<p>画一个「消息气泡」的 Master Component，然后在画布上拖出十几个 Instance，每个 Instance 的文字不同，但结构完全一样：圆角、背景色、头像位置，全都继承自那个 Master。</p>
+
+<p><strong>React 的组件就是完全同一个逻辑：定义一次，用多次，每次传不同的数据。</strong></p>
+
+<div class="demo-box">
+  <h4>互动演示 — Layers 面板</h4>
+  <span class="demo-label interactive">可点击</span>
+  <p style="font-size:0.88em;color:#666;margin-bottom:14px;">点左侧 Layers 面板里的条目，右侧 Canvas 上对应的 Instance 高亮：</p>
+
+  <div class="comp-playground">
+    <!-- LEFT: Figma Layers panel -->
+    <div class="layers-panel">
+      <div class="layers-title">Layers</div>
+
+      <!-- Master Component -->
+      <div class="lr d1" onclick="toggleLayer('mc')">
+        <span class="lt">▶</span>
+        <span class="li-comp">◆</span>
+        <span class="ln">MessageBubble</span>
+      </div>
+
+      <!-- Instance 1 -->
+      <div class="lr d2" id="layer-1" onclick="toggleInst(1, event)">
+        <span class="lt">▶</span>
+        <span class="li-inst">◇</span>
+        <span class="ln">Instance 1</span>
+      </div>
+      <div class="lr-children" id="children-1">
+        <div class="lr d3 sel" onclick="selectLayer(1)">
+          <span class="li-text">T</span>
+          <span class="ln" style="color:#93c5fd;font-family:monospace;">"你好！我是 Demo 助手..."</span>
+        </div>
+        <div class="lr d3" onclick="selectLayer(1)">
+          <span class="li-frame"></span>
+          <span class="ln">avatar</span>
+        </div>
+      </div>
+
+      <!-- Instance 2 -->
+      <div class="lr d2" id="layer-2" onclick="toggleInst(2, event)">
+        <span class="lt">▶</span>
+        <span class="li-inst">◇</span>
+        <span class="ln">Instance 2</span>
+      </div>
+      <div class="lr-children" id="children-2">
+        <div class="lr d3" onclick="selectLayer(2)">
+          <span class="li-text">T</span>
+          <span class="ln" style="font-family:monospace;">"帮我写一段自我介绍"</span>
+        </div>
+        <div class="lr d3" onclick="selectLayer(2)">
+          <span class="li-frame"></span>
+          <span class="ln">avatar</span>
+        </div>
+      </div>
+
+      <!-- Instance 3 -->
+      <div class="lr d2" id="layer-3" onclick="toggleInst(3, event)">
+        <span class="lt">▶</span>
+        <span class="li-inst">◇</span>
+        <span class="ln">Instance 3</span>
+      </div>
+      <div class="lr-children" id="children-3">
+        <div class="lr d3" onclick="selectLayer(3)">
+          <span class="li-text">T</span>
+          <span class="ln" style="font-family:monospace;">"当然！你希望风格..."</span>
+        </div>
+        <div class="lr d3" onclick="selectLayer(3)">
+          <span class="li-frame"></span>
+          <span class="ln">avatar</span>
+        </div>
+      </div>
+    </div>
+    <!-- RIGHT: Canvas -->
+    <div class="comp-canvas">
+      <span class="canvas-label">Canvas</span>
+      <div class="bubble-row" id="b1" style="margin-bottom:10px;">
+        <div class="avatar ai">AI</div>
+        <div class="bubble ai-bubble">你好！我是 Demo 助手，有什么可以帮你的？</div>
+      </div>
+      <div class="bubble-row user-row" id="b2" style="margin-bottom:10px;">
+        <div class="avatar me">我</div>
+        <div class="bubble me-bubble">帮我写一段自我介绍</div>
+      </div>
+      <div class="bubble-row" id="b3">
+        <div class="avatar ai">AI</div>
+        <div class="bubble ai-bubble">当然！你希望风格是正式还是轻松？</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="bubble-tip" style="display:none;margin-top:12px;padding:10px 14px;background:#f0f0ff;border-radius:8px;font-size:0.88em;line-height:1.7;">
+    ✅ 3 条气泡都是同一个 <code>&lt;MessageBubble&gt;</code> 组件的实例。<br>
+    颜色和对齐方向不同，是因为传入的数据（<strong>Props</strong>）不同——下一节讲。
+  </div>
+</div>
+
+<p>组件之间可以嵌套，就像 Figma 的图层——大组件套小组件：</p>
+
+<div class="demo-box" style="background:#fafafa;padding:20px;">
+  <div style="font-family:'SF Mono',Menlo,monospace;font-size:0.88em;line-height:2.2;">
+    <div style="color:#6366f1;font-weight:700;">📦 App <span style="color:#999;font-weight:400;font-size:0.85em;">（根组件，相当于 Figma 的顶层 Frame）</span></div>
+    <div style="padding-left:28px;color:#0ea5e9;font-weight:700;">└─ 📦 ChatWindow <span style="color:#999;font-weight:400;font-size:0.85em;">（聊天窗口）</span></div>
+    <div style="padding-left:56px;color:#10b981;font-weight:700;">└─ 📦 MessageBubble × N <span style="color:#999;font-weight:400;font-size:0.85em;">（每条消息一个 Instance）</span></div>
+    <div style="padding-left:28px;color:#f59e0b;font-weight:700;">└─ 📦 ChatInput <span style="color:#999;font-weight:400;font-size:0.85em;">（输入框 + 发送按钮）</span></div>
+  </div>
+</div>
+
+<details>
+  <summary>查看代码长什么样</summary>
+<pre><code>// 定义一次
+function MessageBubble({ content, role }) {
+  const isUser = role === "user";
+  return (
+    &lt;div className={isUser ? "bubble-user" : "bubble-ai"}&gt;
+      {content}
+    &lt;/div&gt;
+  );
+}
+
+// 用多次，每次传不同的数据
+&lt;MessageBubble content="你好！" role="assistant" /&gt;
+&lt;MessageBubble content="帮我写自我介绍" role="user" /&gt;
+&lt;MessageBubble content="当然，风格偏正式还是轻松？" role="assistant" /&gt;</code></pre>
+</details>
+
+<!-- ===================== 2. Props ===================== -->
+<h2>二、Props = Figma 的 Component Properties</h2>
+
+<p>你给 Figma 的 Master Component 加了 Properties，比如 <code>variant = filled / outline</code>，<code>label = 任意文字</code>。拖出 Instance 之后，在右侧面板修改这些属性，Instance 就变了——但你没有动 Master 本身。</p>
+
+<p><strong>React 的 Props 就是一模一样的东西。</strong>你从外面传数据进来，组件根据这些数据决定怎么显示。</p>
+
+<div class="demo-box">
+  <h4>互动演示 — Props 操控台</h4>
+  <span class="demo-label interactive">可点击</span>
+  <!-- Figma-style: dark Properties Panel (left) + canvas (right) -->
+  <div class="props-playground">
+
+    <!-- LEFT: Properties Panel -->
+    <div class="props-panel">
+      <div class="props-panel-title">Component Properties</div>
+
+      <!-- role segmented control -->
+      <div class="props-row">
+        <div class="props-row-label">role</div>
+        <div class="seg-ctrl" id="role-seg">
+          <div class="seg-slider" id="role-slider"></div>
+          <button class="seg-btn active" data-role="assistant" onclick="setRole('assistant',0)">AI 助手</button>
+          <button class="seg-btn"        data-role="user"      onclick="setRole('user',1)">用户</button>
+        </div>
+      </div>
+
+      <!-- content options -->
+      <div class="props-row">
+        <div class="props-row-label">content</div>
+        <div class="content-options" id="content-opts">
+          <button class="content-opt active" onclick="setContent('你好！有什么可以帮你？',this)">你好！有什么可以帮你？</button>
+          <button class="content-opt"        onclick="setContent('好的，我来帮你写。',this)">好的，我来帮你写。</button>
+          <button class="content-opt"        onclick="setContent('抱歉，我不太理解你的意思。',this)">抱歉，我不太理解你的意思。</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Canvas -->
+    <div class="props-canvas">
+      <span class="canvas-label">Canvas</span>
+      <div class="bubble-row" id="props-preview-row">
+        <div class="avatar ai" id="props-avatar">AI</div>
+        <div class="bubble ai-bubble" id="props-bubble">你好！有什么可以帮你？</div>
+      </div>
+    </div>
+
+    <!-- bottom code strip (full width) -->
+    <div class="props-meta" id="props-meta">
+      &lt;MessageBubble&nbsp;
+      <span class="pk">role</span>=<span class="pv">"assistant"</span>&nbsp;
+      <span class="pk">content</span>=<span class="pv">"你好！有什么可以帮你？"</span>
+      &nbsp;/&gt;
+    </div>
+  </div>
+</div>
+
+<blockquote>
+  <p><strong>关键规则：Props 只能从外往里传，子组件不能自己改 Props。</strong><br>
+  就像你只能在右侧面板改 Instance 的属性，不能在 Instance 内部修改 Master Component 的定义。</p>
+</blockquote>
+
+<details>
+  <summary>查看代码长什么样</summary>
+<pre><code>// 组件声明它能接收哪些 Props
+function MessageBubble({ content, role }) {
+  const isUser = role === "user";
+  return (
+    &lt;div className={isUser ? "bubble-user" : "bubble-ai"}&gt;
+      {content}
+    &lt;/div&gt;
+  );
+}
+
+// 使用时传入不同的 Props——就像改 Figma Instance 的属性
+&lt;MessageBubble role="assistant" content="你好！有什么可以帮你？" /&gt;
+&lt;MessageBubble role="user"      content="帮我写自我介绍" /&gt;</code></pre>
+</details>
+
+<!-- ===================== 3. State ===================== -->
+<h2>三、State = 白板上会变的数据</h2>
+
+<p>想象组件有一块白板，白板上写着一些数据。<strong>白板上的内容一变，React 就自动重新画这个组件</strong>——你不需要手动去改页面上的文字或元素，改白板就够了。这块白板就是 State。</p>
+
+<div class="state-playground">
+  <!-- LEFT: 操作区（改白板） -->
+  <div class="state-panel">
+    <div class="state-panel-title">State (白板)</div>
+    <div class="state-var-row" id="bulb-var-row">
+      <span class="sv-name">isOn</span>
+      <span class="sv-eq">=</span>
+      <span class="sv-val" id="bulb-state">false</span>
+    </div>
+    <div style="padding: 10px 12px 4px;">
+      <button class="bulb-btn" id="bulb-btn" onclick="toggleBulb()" style="width:100%;margin:0;">打开</button>
+    </div>
+  </div>
+  <!-- RIGHT: Canvas（只展示结果） -->
+  <div class="state-canvas">
+    <span class="canvas-label">Demo 1：开关</span>
+    <div class="bulb-wrap">
+      <div class="bulb off" id="bulb">💡</div>
+    </div>
+  </div>
+</div>
+
+<div class="state-playground">
+  <!-- LEFT: 操作区（改白板） -->
+  <div class="state-panel">
+    <div class="state-panel-title">State (白板)</div>
+    <div class="state-var-row" id="counter-var-row">
+      <span class="sv-name">count</span>
+      <span class="sv-eq">=</span>
+      <span class="sv-val" id="counter-state">0</span>
+    </div>
+    <div style="padding: 8px 12px 4px; display:flex; gap:8px;">
+      <button class="counter-btn" onclick="changeCount(-1)" style="flex:1;border-radius:6px;">−</button>
+      <button class="counter-btn" onclick="changeCount(1)"  style="flex:1;border-radius:6px;">+</button>
+    </div>
+  </div>
+  <!-- RIGHT: Canvas（只展示结果） -->
+  <div class="state-canvas">
+    <span class="canvas-label">Demo 2：计数器</span>
+    <div class="counter-num" id="counter-num">0</div>
+  </div>
+</div>
+
+<h3>State vs 普通变量：为什么不能用普通变量？</h3>
+
+<p>很多人会问：我直接 <code>let count = 0</code>，然后 <code>count++</code>，不行吗？</p>
+
+<div class="compare-grid">
+  <div class="compare-box wrong">
+    <span class="compare-badge">❌ 普通变量</span>
+    <div class="compare-num" id="wrong-num">0</div>
+    <button class="compare-btn" onclick="wrongClick()">+ 1（试试）</button>
+    <p class="compare-note">数据改了，React 不知道<br>页面纹丝不动</p>
+  </div>
+  <div class="compare-box right">
+    <span class="compare-badge">✅ State</span>
+    <div class="compare-num" id="right-num">0</div>
+    <button class="compare-btn" onclick="rightClick()">+ 1（有效）</button>
+    <p class="compare-note">调用 setCount()，React 收到通知<br>页面立刻更新</p>
+  </div>
+</div>
+
+<blockquote>
+  <p><strong>State 的本质：你跟 React 之间的通信通道。</strong><br>
+  你调用 <code>setXxx(新值)</code>，相当于告诉 React：「白板变了，请重新画一下。」普通变量改了，React 根本不知道，页面就不会动。</p>
+</blockquote>
+
+<details>
+  <summary>查看代码长什么样</summary>
+<pre><code>// ❌ 普通变量——页面不会更新
+let count = 0;
+function handleClick() {
+  count++;  // 数据改了，但 React 不知道，页面没反应
+}
+
+// ✅ State——页面自动更新
+const [count, setCount] = useState(0);
+function handleClick() {
+  setCount(count + 1);  // 通知 React，页面立刻更新
+}</code></pre>
+</details>
+
+<!-- ===================== 4. useEffect ===================== -->
+<h2>四、useEffect = Figma 的「On Load」触发器</h2>
+
+<p>你在 Figma 做原型时，可以给一个 Frame 加一个「On Load」交互——页面一打开，自动播放一段动画，或者自动跳到某个状态。不需要用户点任何东西，加载完就自动发生。</p>
+
+<p><strong><code>useEffect</code> 就是代码里的「On Load」：组件出现在页面上之后，自动执行一段逻辑。</strong>最常见的用途是页面一加载就去后端拿数据。</p>
+
+<div class="demo-box">
+  <h4>互动演示 — 模拟「页面加载后自动获取数据」</h4>
+  <span class="demo-label interactive">可点击</span>
+  <p style="font-size:0.88em;color:#666;margin-bottom:14px;">点「重新挂载」，模拟组件第一次出现在页面上的过程：</p>
+
+  <div class="effect-playground">
+    <!-- LEFT: Figma-style Interactions panel -->
+    <div class="effect-panel">
+      <div class="effect-panel-title">Interactions</div>
+      <span class="effect-trigger-badge">On Load</span>
+      <div class="effect-log-line" id="elog-1"><div class="elog-dot"></div>等待挂载...</div>
+      <div class="effect-log-line" id="elog-2"><div class="elog-dot"></div>useEffect 触发</div>
+      <div class="effect-log-line" id="elog-3"><div class="elog-dot"></div>fetchWelcome()</div>
+      <div class="effect-log-line" id="elog-4"><div class="elog-dot"></div>setMessages(...)</div>
+    </div>
+    <!-- RIGHT: canvas with component frame -->
+    <div class="effect-canvas">
+      <span class="canvas-label">Canvas</span>
+      <div class="effect-frame">
+        <div class="effect-frame-label">📦 WelcomeMessage</div>
+        <div id="effect-loading" style="color:#6366f1;font-weight:600;">⏳ 正在获取欢迎消息...</div>
+        <div id="effect-message" style="display:none;font-size:1em;color:#1a1b1d;">你好！我是 Demo 助手，有什么可以帮你的？</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:12px;">
+    <button onclick="remountEffect()" style="padding:8px 18px;border-radius:8px;border:none;background:#6366f1;color:#fff;font-weight:600;cursor:pointer;">重新挂载（模拟刷新页面）</button>
+  </div>
+</div>
+
+<p>Demo 项目的 <code>App.tsx</code> 里，欢迎消息就是这么来的：</p>
+
+<div class="demo-box" style="background:#fafafa;padding:20px;">
+  <div style="font-size:0.88em;line-height:2;color:#555;">
+    <div>① 组件第一次出现在页面上</div>
+    <div style="padding-left:24px;color:#6366f1;">→ <strong>useEffect 触发</strong></div>
+    <div style="padding-left:24px;">→ 调 <code>fetchWelcome()</code> 发请求给后端</div>
+    <div style="padding-left:24px;">→ 后端返回欢迎文字</div>
+    <div style="padding-left:24px;color:#166534;">→ <strong>setMessages()</strong> 更新白板 → 页面显示欢迎消息</div>
+    <div>② 之后再重新渲染，useEffect <strong>不会再次执行</strong>（因为 <code>[]</code>）</div>
+  </div>
+</div>
+
+<h3>两种常见用法</h3>
+
+<table>
+  <thead>
+    <tr><th>写法</th><th>含义</th><th>Figma 类比</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>useEffect(() =&gt; {}, [])</code></td>
+      <td>只在组件第一次出现时执行一次</td>
+      <td>On Load — 页面打开时触发一次</td>
+    </tr>
+    <tr>
+      <td><code>useEffect(() =&gt; {}, [value])</code></td>
+      <td>每次 <code>value</code> 变化时执行</td>
+      <td>On Variable Change — 某个变量变了就触发</td>
+    </tr>
+  </tbody>
+</table>
+
+<blockquote>
+  <p><strong>记住一件事就够了：看到 <code>useEffect</code>，就问自己——这段代码是「什么时候自动触发」的？</strong><br>
+  看 <code>[]</code> 里面有没有东西：没有 = 只触发一次；有变量 = 那个变量变了就触发。</p>
+</blockquote>
+
+<details>
+  <summary>查看代码长什么样</summary>
+<pre><code>// 写法一：只在第一次加载时执行（最常见）
+useEffect(() =&gt; {
+  fetchWelcome().then((text) =&gt; {
+    setMessages([{ role: "assistant", content: text }]);
+  });
+}, []);  // ← 空数组 = 只执行一次
+
+// 写法二：每次 messages 变化时执行（比如自动滚到底部）
+useEffect(() =&gt; {
+  bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+}, [messages]);  // ← messages 变了就执行</code></pre>
+</details>
+
+<!-- ===================== 5. 渲染流程 ===================== -->
+<h2>五、渲染 = 数据变了，React 帮你重画</h2>
+
+<p>每次 State 变化，React 都会走一遍下面这个流程。<strong>点下面的 + 按钮</strong>，自动走完一遍：</p>
+
+<div class="render-trigger">
+  <div>
+    <div class="render-trigger-desc">点 + 触发一次 State 更新，看流程如何运转：</div>
+    <div style="display:flex;align-items:center;gap:14px;">
+      <button class="counter-btn" onclick="liveRenderClick()">+</button>
+      <div class="render-live-count" id="render-live-num">0</div>
+    </div>
+  </div>
+  <div class="render-trigger-hint">→ 每次点击，下方 5 步自动逐步高亮 ↓</div>
+</div>
+
+<div class="demo-box">
+  <span class="demo-label concept">原理</span>
+  <div class="render-steps" id="render-steps">
+    <div class="render-step active" data-step="0">
+      <div class="step-dot">1</div>
+      <div class="step-text">
+        <strong>用户操作触发事件</strong>
+        <p>比如点了「发送」按钮，或者点了「+」——某个函数被调用了。</p>
+      </div>
+    </div>
+    <div class="render-step" data-step="1">
+      <div class="step-dot">2</div>
+      <div class="step-text">
+        <strong>调用 setXxx() 修改白板</strong>
+        <p>比如 <code>setMessages([...messages, 新消息])</code>——告诉 React「白板变了」。</p>
+      </div>
+    </div>
+    <div class="render-step" data-step="2">
+      <div class="step-dot">3</div>
+      <div class="step-text">
+        <strong>React 重新执行组件函数</strong>
+        <p>React 收到通知，把整个组件函数重新跑一遍，算出新的页面结构。</p>
+      </div>
+    </div>
+    <div class="render-step" data-step="3">
+      <div class="step-dot">4</div>
+      <div class="step-text">
+        <strong>对比新旧结构，只更新变化的部分</strong>
+        <p>React 不会刷新整个页面，只改那个变了的地方——比如聊天窗口多了一条气泡。</p>
+      </div>
+    </div>
+    <div class="render-step" data-step="4">
+      <div class="step-dot">5</div>
+      <div class="step-text">
+        <strong>页面更新完成</strong>
+        <p>用户看到新的气泡出现了。整个过程通常在 16 毫秒内完成（1 帧）。</p>
+      </div>
+    </div>
+  </div>
+  <div class="render-controls">
+    <button class="render-btn secondary" onclick="renderPrev()">← 上一步</button>
+    <button class="render-btn" onclick="renderNext()">下一步 →</button>
+    <button class="render-btn secondary" onclick="renderReset()">重置</button>
+  </div>
+  <div id="render-step-counter" style="margin-top:10px;font-size:0.82em;color:#aaa;">第 1 步 / 共 5 步</div>
+</div>
+
+<p>Figma 类比：就像你改了一个 Master Component 的颜色，所有用到它的 Instance 立刻都更新了——你不需要一个个手动改，Figma 帮你做了。React 也是同一个逻辑，只不过它更新的是浏览器里的真实页面。</p>
+
+<!-- ===================== 5. 综合 ===================== -->
+<h2>六、组合起来：Demo 聊天项目的完整结构</h2>
+
+<p>用第 2 课的 Demo 项目，把三个概念都串起来：</p>
+
+<div class="demo-box">
+  <span class="demo-label concept">架构图</span>
+
+  <div class="arch-node manager">
+    <div class="node-title">📦 App（管家组件）</div>
+    <div style="font-size:0.82em;color:#5b21b6;font-weight:600;margin-bottom:6px;">拥有的 State（白板）：</div>
+    <div>
+      <span class="node-state"><span class="state-dot"></span>messages = [ 消息列表 ]</span>
+      <span class="node-state"><span class="state-dot"></span>loading = false</span>
+    </div>
+
+    <div class="arrow-label">
+      <span class="arr">↓</span>
+      把白板数据当 Props 往下传给子组件
+    </div>
+
+    <div class="arch-children">
+      <div class="arch-child display">
+        <div class="child-title">📦 ChatWindow（展示）</div>
+        <div style="font-size:0.82em;color:#0369a1;margin-bottom:6px;">接收的 Props：</div>
+        <span class="props-tag">messages</span>
+        <span class="props-tag">loading</span>
+        <div style="font-size:0.82em;color:#555;margin-top:8px;">拿到 messages，用 .map() 画出每条气泡。loading=true 时显示「正在输入」动画。</div>
+      </div>
+      <div class="arch-child interact">
+        <div class="child-title">📦 ChatInput（交互）</div>
+        <div style="font-size:0.82em;color:#92400e;margin-bottom:6px;">接收的 Props：</div>
+        <span class="props-tag">onSend</span>
+        <span class="props-tag">disabled</span>
+        <div style="font-size:0.82em;color:#555;margin-top:8px;">用户点发送时，调用 onSend()，把文字传给管家 App。</div>
+      </div>
+    </div>
+
+    <div class="arrow-label" style="color:#d97706;">
+      <span class="arr">↑</span>
+      ChatInput 调 onSend() → App 的 handleSend 被触发 → setMessages() 更新白板 → 页面重新渲染
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#a78bfa;"></div>组件（Component）</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#7c3aed;"></div>State（白板数据）</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#0ea5e9;"></div>Props（传入参数）</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f59e0b;"></div>用户操作 → 通知管家</div>
+  </div>
+</div>
+
+<!-- ===================== 总结 ===================== -->
+<h2>七、总结：四张卡</h2>
+
+<div class="summary-cards" style="grid-template-columns:repeat(2,1fr);">
+  <div class="summary-card c-comp">
+    <div class="card-icon">📦</div>
+    <h4>组件（Component）</h4>
+    <p>可复用的 UI 零件，定义一次，用多次，每次给不同数据</p>
+    <div class="card-analogy">= Figma 的 Master Component</div>
+  </div>
+  <div class="summary-card c-props">
+    <div class="card-icon">🎛</div>
+    <h4>Props</h4>
+    <p>从外部传进来的参数，决定组件显示什么。子组件只读，不能自己改</p>
+    <div class="card-analogy">= Figma 的 Component Properties</div>
+  </div>
+  <div class="summary-card c-state">
+    <div class="card-icon">📋</div>
+    <h4>State（状态）</h4>
+    <p>组件内部会变的数据（白板）。改了之后，React 自动重画页面</p>
+    <div class="card-analogy">= 白板上随时可擦写的内容</div>
+  </div>
+  <div class="summary-card" style="background:#fff7ed;">
+    <div class="card-icon">⚡</div>
+    <h4>useEffect</h4>
+    <p>组件出现后自动执行的代码。<code>[]</code> = 只跑一次，<code>[val]</code> = val 变了就跑</p>
+    <div class="card-analogy">= Figma 的 On Load / On Variable Change 触发器</div>
+  </div>
+</div>
+
+<!-- ===================== 练习 ===================== -->
+<h2>八、思考题</h2>
+
+<p>不需要打开代码，根据这节课学到的内容，试着回答下面三个问题。答案可以折叠查看。</p>
+
+<div class="task-list">
+  <h4>思考 1：什么时候用 State，什么时候用 Props？</h4>
+  <p>你在设计一个「点赞按钮」组件。按钮当前是否被点赞（true/false）应该放在 State 还是 Props？如果这个按钮是父组件控制的，答案会变吗？</p>
+  <details>
+    <summary>查看参考答案</summary>
+    <div style="padding:12px 0;font-size:0.9em;line-height:1.8;">
+      <p><strong>自己管自己 → State；父组件决定 → Props。</strong></p>
+      <p>如果点赞状态只属于这个按钮自己（独立的），应该放在 State：<code>const [liked, setLiked] = useState(false)</code>。</p>
+      <p>如果父组件需要统一管理所有帖子的点赞状态（比如要同步给后端），那就从外面传进来：<code>&lt;LikeButton liked={post.liked} onToggle={handleToggle} /&gt;</code>——这时 <code>liked</code> 是 Props，State 在父组件里。</p>
+    </div>
+  </details>
+</div>
+
+<div class="task-list">
+  <h4>思考 2：页面刷新后数据消失了，为什么？</h4>
+  <p>你用 AI 做了一个 Todo 应用，添加了几条任务，但刷新页面后全没了。你觉得问题出在哪？</p>
+  <details>
+    <summary>查看参考答案</summary>
+    <div style="padding:12px 0;font-size:0.9em;line-height:1.8;">
+      <p><strong>State 只活在内存里，刷新页面就消失了。</strong></p>
+      <p>React 的 State（白板）是存在浏览器内存中的，页面一刷新，内存清空，State 回到初始值。</p>
+      <p>要持久化数据，需要：① 存到后端数据库（最常见）；② 或者存到 <code>localStorage</code>（刷新不消失，但换设备就没了）。</p>
+      <p>所以 AI 给你写的 Todo 应用如果没有后端，任务就只存在当次会话的白板上。</p>
+    </div>
+  </details>
+</div>
+
+<div class="task-list">
+  <h4>思考 3：为什么要用 useEffect 拿数据，不能直接在组件里写？</h4>
+  <p>有人说：「我直接在组件函数里写 <code>fetch(...)</code> 不行吗？」你怎么回答他？</p>
+  <details>
+    <summary>查看参考答案</summary>
+    <div style="padding:12px 0;font-size:0.9em;line-height:1.8;">
+      <p><strong>可以写，但每次渲染都会重复请求——会出 bug。</strong></p>
+      <p>组件函数在每次 State 变化时都会重新执行。如果直接在函数里写 <code>fetch</code>，那么每次任何 State 变化（哪怕和这个请求毫无关系）都会重新发一次请求，造成：</p>
+      <ul>
+        <li>无限循环（fetch 完 → setData → 重新渲染 → 再 fetch → ...）</li>
+        <li>不必要的重复请求，浪费流量</li>
+      </ul>
+      <p><code>useEffect(() =&gt; { fetch... }, [])</code> 只在组件第一次出现时执行一次，解决了这个问题。</p>
+    </div>
+  </details>
+</div>
+
+<div class="footer">
+  <p>编程入门课程 &copy; 2026 &nbsp;·&nbsp; 番外篇</p>
+</div>
+
+</div>
+
+<script>
+// ===== 组件高亮 =====
+// ===== 组件 Layers Demo =====
+function toggleLayer(id) {
+  // toggle master — select all
+  selectLayer('all');
+}
+
+function toggleInst(n, e) {
+  e.stopPropagation();
+  const row      = document.getElementById('layer-' + n);
+  const children = document.getElementById('children-' + n);
+  const arrow    = row.querySelector('.lt');
+  const isOpen   = children.classList.contains('open');
+
+  // close all, then open this one (if wasn't open)
+  [1,2,3].forEach(i => {
+    document.getElementById('children-' + i).classList.remove('open');
+    document.getElementById('layer-' + i).classList.remove('open', 'sel');
+    document.getElementById('layer-' + i).querySelector('.lt').style.transform = '';
+  });
+
+  if (!isOpen) {
+    children.classList.add('open');
+    row.classList.add('open', 'sel');
+    arrow.style.transform = 'rotate(90deg)';
+    selectLayer(n);
+  } else {
+    selectLayer(null);
+  }
+}
+
+function selectLayer(target) {
+  // unhighlight all bubbles
+  [1,2,3].forEach(n => document.getElementById('b' + n).classList.remove('hl'));
+  document.getElementById('bubble-tip').style.display = 'none';
+
+  if (target === 'all') {
+    [1,2,3].forEach(n => document.getElementById('b' + n).classList.add('hl'));
+    document.getElementById('bubble-tip').style.display = 'block';
+  } else if (target) {
+    document.getElementById('b' + target).classList.add('hl');
+  }
+}
+
+// open Instance 1 by default
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('children-1').classList.add('open');
+  document.getElementById('layer-1').classList.add('open', 'sel');
+  document.getElementById('layer-1').querySelector('.lt').style.transform = 'rotate(90deg)';
+  selectLayer(1);
+});
+
+// ===== Props Demo =====
+let currentRole = 'assistant';
+let currentContent = '你好！有什么可以帮你？';
+
+// Initialise segmented slider position on first paint
+document.addEventListener('DOMContentLoaded', () => { initRoleSlider(0); });
+
+function initRoleSlider(idx) {
+  const seg = document.getElementById('role-seg');
+  if (!seg) return;
+  const slider = document.getElementById('role-slider');
+  const btns = seg.querySelectorAll('.seg-btn');
+  if (!btns[idx]) return;
+  const btn = btns[idx];
+  slider.style.left  = btn.offsetLeft + 'px';
+  slider.style.width = btn.offsetWidth + 'px';
+}
+
+function setRole(role, idx) {
+  currentRole = role;
+  const seg    = document.getElementById('role-seg');
+  const slider = document.getElementById('role-slider');
+  const btns   = seg.querySelectorAll('.seg-btn');
+  btns.forEach(b => b.classList.remove('active'));
+  btns[idx].classList.add('active');
+  slider.style.left  = btns[idx].offsetLeft + 'px';
+  slider.style.width = btns[idx].offsetWidth + 'px';
+  updatePropsPreview();
+}
+
+function setContent(content, btn) {
+  currentContent = content;
+  document.getElementById('content-opts').querySelectorAll('.content-opt')
+    .forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  updatePropsPreview();
+}
+
+function updatePropsPreview() {
+  const isUser = currentRole === 'user';
+  const row    = document.getElementById('props-preview-row');
+  const avatar = document.getElementById('props-avatar');
+  const bubble = document.getElementById('props-bubble');
+  const meta   = document.getElementById('props-meta');
+
+  // spring-bounce transition
+  row.classList.add('changing');
+  setTimeout(() => {
+    row.className  = 'bubble-row' + (isUser ? ' user-row' : '');
+    avatar.className   = isUser ? 'avatar me' : 'avatar ai';
+    avatar.textContent = isUser ? '我' : 'AI';
+    bubble.className   = isUser ? 'bubble me-bubble' : 'bubble ai-bubble';
+    bubble.textContent = currentContent;
+    meta.innerHTML = `&lt;MessageBubble&nbsp;<span class="pk">role</span>=<span class="pv">"${currentRole}"</span>&nbsp;<span class="pk">content</span>=<span class="pv">"${currentContent}"</span>&nbsp;/&gt;`;
+    row.classList.remove('changing');
+  }, 180);
+}
+
+// ===== 灯泡 =====
+let bulbOn = false;
+function toggleBulb() {
+  bulbOn = !bulbOn;
+  document.getElementById('bulb').className       = 'bulb ' + (bulbOn ? 'on' : 'off');
+  document.getElementById('bulb-btn').textContent  = bulbOn ? '关闭' : '打开';
+  document.getElementById('bulb-state').textContent = String(bulbOn);
+  flashStateRow('bulb-var-row');
+}
+
+// ===== 计数器 =====
+let count = 0;
+function changeCount(delta) {
+  count += delta;
+  const el = document.getElementById('counter-num');
+  el.textContent = count;
+  el.style.transform = 'scale(1.2)';
+  setTimeout(() => el.style.transform = '', 150);
+  document.getElementById('counter-state').textContent = count;
+  flashStateRow('counter-var-row');
+}
+
+function flashStateRow(id) {
+  const row = document.getElementById(id);
+  if (!row) return;
+  row.classList.remove('flashing');
+  void row.offsetWidth; // force reflow
+  row.classList.add('flashing');
+  setTimeout(() => row.classList.remove('flashing'), 500);
+}
+
+// ===== 对比 Demo =====
+let rightNum = 0;
+
+function wrongClick() {
+  // 故意不更新 DOM，模拟普通变量的 bug
+  const el = document.getElementById('wrong-num');
+  el.style.transform = 'scale(0.95)';
+  setTimeout(() => el.style.transform = '', 150);
+}
+
+function rightClick() {
+  rightNum++;
+  const el = document.getElementById('right-num');
+  el.textContent = rightNum;
+  el.style.transform = 'scale(1.25)';
+  el.style.color = '#166534';
+  setTimeout(() => { el.style.transform = ''; el.style.color = ''; }, 300);
+}
+
+// ===== useEffect Demo =====
+function setElogState(id, state) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.remove('active', 'done');
+  if (state) el.classList.add(state);
+}
+
+function remountEffect() {
+  const loading = document.getElementById('effect-loading');
+  const message = document.getElementById('effect-message');
+  ['elog-1','elog-2','elog-3','elog-4'].forEach(id => setElogState(id, null));
+
+  loading.style.display = 'block';
+  message.style.display = 'none';
+
+  setElogState('elog-1', 'active');
+  setTimeout(() => {
+    setElogState('elog-1', 'done');
+    setElogState('elog-2', 'active');
+  }, 1200);
+  setTimeout(() => {
+    setElogState('elog-2', 'done');
+    setElogState('elog-3', 'active');
+  }, 2600);
+  setTimeout(() => {
+    setElogState('elog-3', 'done');
+    setElogState('elog-4', 'active');
+    loading.style.display = 'none';
+    message.style.display = 'block';
+  }, 4000);
+  setTimeout(() => {
+    setElogState('elog-4', 'done');
+  }, 5000);
+}
+// 页面加载时自动演示一次
+remountEffect();
+
+
+let currentStep = 0;
+const totalSteps = 5;
+
+function updateRenderSteps() {
+  document.querySelectorAll('.render-step').forEach((el, i) => {
+    el.classList.toggle('active', i <= currentStep);
+  });
+  document.getElementById('render-step-counter').textContent =
+    `第 ${currentStep + 1} 步 / 共 ${totalSteps} 步`;
+}
+function renderNext()  { if (currentStep < totalSteps - 1) { currentStep++; updateRenderSteps(); } }
+function renderPrev()  { if (currentStep > 0)              { currentStep--; updateRenderSteps(); } }
+function renderReset() { currentStep = 0; updateRenderSteps(); }
+
+// ===== 渲染流程 live trigger =====
+let liveCount = 0;
+let renderAnimating = false;
+function liveRenderClick() {
+  if (renderAnimating) return;
+  liveCount++;
+  document.getElementById('render-live-num').textContent = liveCount;
+
+  renderAnimating = true;
+  currentStep = 0;
+  updateRenderSteps();
+  let step = 1;
+  const iv = setInterval(() => {
+    currentStep = step;
+    updateRenderSteps();
+    step++;
+    if (step >= totalSteps) {
+      clearInterval(iv);
+      renderAnimating = false;
+    }
+  }, 500);
+}
+</script>
+</body>
+</html>
