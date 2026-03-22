@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第 3 课教案：React 心智模型 — 组件、状态、渲染</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="container">
+
+<nav class="nav">
+  <a href="../index.html" class="nav-back">&larr; 课程首页</a>
+</nav>
+
+<h1>第 3 课教案：React 心智模型 — 组件、状态、渲染</h1>
+
+<blockquote>
+  <p><strong>目标</strong>：通过从零 live coding 一个「Issue 看板」，让学员建立 React 的核心直觉——组件是什么、Props 和 State 有什么区别、为什么状态一变页面就更新。最终回到 Demo 项目，发现结构一模一样。</p>
+</blockquote>
+
+<!-- 教学方式 -->
+<h2>教学方式</h2>
+
+<ul>
+  <li><strong>讲师现场写代码</strong>（live coding），学员看屏幕跟思路</li>
+  <li><strong>轻互动</strong>：每 ~10 分钟穿插一个小互动（预测结果 / 选择题 / 打字回答），防走神</li>
+  <li>互动用飞书群或会议聊天框进行，学员打字即可，不需要动手写代码</li>
+  <li><strong>课后作业</strong>让学员自己动手练习</li>
+</ul>
+
+<!-- 课前准备 -->
+<h2>课前准备</h2>
+
+<h3>讲师侧</h3>
+
+<div class="task-list">
+  <ul>
+    <li>在 StackBlitz 上准备好一个空白 React 项目（<code>react-ts</code> 模板），确认能跑通</li>
+    <li>提前把每一步要写的代码过一遍，确保 live coding 流畅</li>
+    <li>准备好 Demo 项目（第 2 课的），用于最后对比环节</li>
+    <li>准备好 4 个互动问题（见课程流程中标注的互动环节）</li>
+    <li>开启屏幕录制工具</li>
+  </ul>
+</div>
+
+<h3>学员侧</h3>
+
+<div class="task-list">
+  <ul>
+    <li>看完第 2 课内容（至少知道 Demo 项目的组件树长什么样）</li>
+    <li>无需准备开发环境，课堂上看讲师屏幕即可</li>
+  </ul>
+</div>
+
+<!-- 课程流程 -->
+<h2>课程流程</h2>
+
+<h3><span class="timeline">0:00-0:05</span> 开场：从一个问题出发</h3>
+
+<p>衔接第 2 课：</p>
+
+<ul>
+  <li>"上节课我们读了 Demo 项目的代码，看到了 useState、props 这些东西。今天我们不读别人的代码了——<strong>我们自己写</strong>。"</li>
+  <li>"我们从世界上最简单的组件开始，一步一步加功能。到最后你会发现——你写出来的东西，和 Demo 项目里的结构一模一样。"</li>
+  <li>"今天我们要做一个 Issue 看板——就像你们每天在飞书项目/Jira 里看到的那种卡片。一张卡片上有标题、标签、负责人、状态。"</li>
+</ul>
+
+<p>打开 StackBlitz，新建一个空白 React 项目。</p>
+
+<!-- 第零步：函数是什么 -->
+<h3><span class="timeline">0:05-0:10</span> 第零步：函数是什么</h3>
+
+<p><strong>教学目标</strong>：理解"函数就是一个有名字的操作，叫它的名字就能执行"</p>
+
+<p>在写组件之前，先讲清楚"函数"——因为 React 的组件就是一个函数。</p>
+
+<p>讲师在 Console 里现场演示：</p>
+
+<pre><code>// 函数就是：取个名字，描述一个操作
+function sayHello() {
+  console.log("你好！");
+}
+
+// 叫它的名字 + 括号，它就执行
+sayHello();  // Console 打出"你好！"
+sayHello();  // 再叫一次，再执行一次——同一个操作可以反复用</code></pre>
+
+<p>类比：</p>
+<ul>
+  <li>函数就像<strong>菜谱</strong>——写一次，以后照着做就行，不用每次重新想步骤</li>
+  <li><code>function sayHello()</code> = 写菜谱，取名叫"sayHello"</li>
+  <li><code>sayHello()</code> = 照着菜谱做一次</li>
+</ul>
+
+<p>然后加参数：</p>
+
+<pre><code>// 函数可以接收数据——叫"参数"
+function sayHello(name) {
+  console.log("你好，" + name + "！");
+}
+
+sayHello("小明");  // "你好，小明！"
+sayHello("小红");  // "你好，小红！"
+// 同一个函数，传不同的数据，结果不同</code></pre>
+
+<ul>
+  <li>参数就像菜谱里的"食材"——同一个菜谱，用鸡肉做出来是鸡肉菜，用豆腐做出来是豆腐菜</li>
+</ul>
+
+<p>最后过渡到组件：</p>
+
+<blockquote>
+  <p>"React 的组件也是一个函数，只不过普通函数 return 的是 console.log 这样的操作，组件函数 return 的是<strong>页面内容</strong>——你写什么它就在页面上显示什么。参数在 React 里有个专门的名字叫 <strong>Props</strong>，一会儿就会讲到。"</p>
+</blockquote>
+
+<!-- CSS 讲解 -->
+<h3><span class="timeline">0:10-0:13</span> 穿插：CSS 是怎么回事</h3>
+
+<p>写完第一个组件后，趁卡片在页面上，讲一下样式从哪来的。</p>
+
+<blockquote>
+  <p>"卡片出来了，但你可能会问——圆角、白色背景、阴影这些样式是从哪来的？"</p>
+</blockquote>
+
+<p>打开 <code>index.css</code>，指给学员看：</p>
+
+<pre><code>.issue-card {
+  background: #fff;          /* 白色背景 */
+  border-radius: 12px;       /* 圆角 */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);  /* 阴影 */
+}</code></pre>
+
+<ul>
+  <li><strong>对应关系</strong>：JSX 里写 <code>className="issue-card"</code>，CSS 里用 <code>.issue-card { }</code> 给它加样式。className 是名字，CSS 是样式规则</li>
+  <li>Figma 类比：<strong>图层名 = className，右侧 Design 面板 = CSS 规则</strong></li>
+  <li><code>className</code> 不叫 <code>class</code>，因为 <code>class</code> 在 JS 里是保留字（被占用了），所以 React 换了个名字</li>
+</ul>
+
+<p><strong>现场演示</strong>（用 DevTools）：</p>
+
+<ol>
+  <li>打开 DevTools → Elements 面板 → 点击卡片 → 右侧能看到对应的 CSS 规则</li>
+  <li>试着把 <code>border-radius: 12px</code> 改成 <code>0px</code> → 圆角立刻消失</li>
+  <li>"在 DevTools 里改的不会保存到代码里，但可以先试效果——这就是第 1 课学的 Elements 面板"</li>
+</ol>
+
+<blockquote>
+  <p>"这门课 CSS 不用你手写，已经提前准备好了。你只需要知道一件事：<strong>className 对应 CSS 规则</strong>。以后你看 AI 生成的代码，看到 className 就知道——去 CSS 文件里找同名的规则，就能知道这个元素长什么样。"</p>
+</blockquote>
+
+<!-- 第一步：组件 -->
+<h3><span class="timeline">0:13-0:18</span> 第一步：写一个最简单的组件</h3>
+
+<p><strong>教学目标</strong>：理解"组件就是一个函数，返回页面内容"</p>
+
+<p>讲师现场写：</p>
+
+<pre><code>function IssueCard() {
+  return (
+    &lt;div className="issue-card"&gt;
+      &lt;span className="label"&gt;Bug&lt;/span&gt;
+      &lt;h3&gt;首页加载速度太慢&lt;/h3&gt;
+      &lt;p&gt;负责人：小明&lt;/p&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+
+<ul>
+  <li>保存 → 页面出现一张卡片 → "这就是一个组件"</li>
+  <li>改标题文字 → 保存 → 页面跟着变 → "组件就是一个函数，return 什么页面就显示什么"</li>
+  <li>Figma 类比：这就像画了一个卡片 Frame，里面放了标签、标题、负责人</li>
+  <li>关键点：组件名大写、return 里写 JSX（长得像 HTML）</li>
+</ul>
+
+<div class="task-list" style="background:#e0f2fe;border-color:#7dd3fc;">
+  <p><strong>互动 ①（预测）</strong>：「这张卡片现在写死了一个 Bug。但看板上有很多 Issue——有 Bug 也有需求，负责人不同，标题也不同。如果每张卡片都写一个新组件，那 100 张 Issue 岂不是要写 100 个组件？你觉得怎么解决？」→ 群里打字 → 引出 Props</p>
+</div>
+
+<!-- 第二步：Props -->
+<h3><span class="timeline">0:18-0:28</span> 第二步：加 Props — 让组件能接收数据</h3>
+
+<p><strong>教学目标</strong>：理解"同一个组件，传不同的数据，显示不同的内容"；认识 TypeScript 的 interface</p>
+
+<h4>(a) 先用最简单的写法——不带 TypeScript（3min）</h4>
+
+<pre><code>// 先不管类型，最直观地看 Props 怎么回事
+function IssueCard({ title, label, assignee }) {
+  return (
+    &lt;div className="issue-card"&gt;
+      &lt;span className="label"&gt;{label}&lt;/span&gt;
+      &lt;h3&gt;{title}&lt;/h3&gt;
+      &lt;p&gt;负责人：{assignee}&lt;/p&gt;
+    &lt;/div&gt;
+  );
+}
+
+// 一个组件，三张不同的卡片
+&lt;IssueCard title="首页加载速度太慢" label="Bug" assignee="小明" /&gt;
+&lt;IssueCard title="支持暗黑模式" label="需求" assignee="小红" /&gt;
+&lt;IssueCard title="登录页文案优化" label="设计" assignee="大伟" /&gt;</code></pre>
+
+<ul>
+  <li>Figma 类比：Master Component 加了 text properties（title、label、assignee），每个 Instance 填不同的值</li>
+  <li><strong>大括号 <code>{}</code> 的作用</strong>——这个要多讲一下：
+    <ul>
+      <li>JSX 里默认写的都是<strong>纯文字</strong>。比如 <code>&lt;div&gt;你好&lt;/div&gt;</code>，页面就原样显示"你好"</li>
+      <li>但如果你想在文字里插入一个<strong>变量的值</strong>，就需要用大括号包起来：<code>&lt;div&gt;你好，{name}&lt;/div&gt;</code></li>
+      <li>大括号的意思是："这里不是纯文字，这里要执行一段 JS，把结果填进来"</li>
+      <li>Figma 类比：就像在 Figma 文本图层里用 <code>#变量名#</code> 引用一个 Variable——文本本身是死的，但那个位置会被变量的值替换</li>
+      <li>同样的道理也用在传 Props 上：<code>title="首页加载速度太慢"</code> 是传一个固定的字符串；<code>title={myVariable}</code> 是传一个变量的值。引号 = 写死的文字，大括号 = 活的变量</li>
+    </ul>
+  </li>
+  <li>页面上同时出现 3 张不同内容的卡片 → "同一个组件，不同的数据"</li>
+  <li><strong>关键规则</strong>：Props 从外面传进来，组件自己不能改</li>
+</ul>
+
+<h4>(b) 加上 TypeScript——interface 是什么（4min）</h4>
+
+<blockquote>
+  <p>"刚才这么写能跑，但有个问题——如果你不小心把 <code>title</code> 拼成了 <code>titl</code>，代码不会报错，页面上就是空的，你还得找半天。TypeScript 能帮你自动检查。"</p>
+</blockquote>
+
+<pre><code>// interface 就是一份"数据说明书"
+// 列清楚这个组件需要哪些数据、每个是什么类型
+// 就像点外卖的订单格式：菜名(文字)、数量(数字)、备注(文字)——少填一个，系统就报错
+interface IssueCardProps {
+  title: string;      // 标题，必须是文字
+  label: string;      // 标签（Bug / 需求 / 设计）
+  assignee: string;   // 负责人
+}
+
+// 参数后面加 : IssueCardProps，告诉 TypeScript "我期望收到这些数据"
+// 传错了 → 编辑器画红线；拼错字段名 → 编辑器画红线
+function IssueCard({ title, label, assignee }: IssueCardProps) {
+  return (
+    &lt;div className="issue-card"&gt;
+      &lt;span className="label"&gt;{label}&lt;/span&gt;
+      &lt;h3&gt;{title}&lt;/h3&gt;
+      &lt;p&gt;负责人：{assignee}&lt;/p&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+
+<p><strong>现场演示</strong>（让学员看到 TypeScript 的好处）：</p>
+
+<ol>
+  <li>故意把 <code>title</code> 拼成 <code>titl</code> → VS Code 立刻画红线 → "编辑器帮你抓错了"</li>
+  <li>故意少传一个 Props → 画红线 → "缺了必填字段"</li>
+  <li>鼠标悬停在组件上 → 能看到它需要哪些 Props → "这就是说明书的作用"</li>
+</ol>
+
+<blockquote>
+  <p>"<strong>interface = 数据说明书</strong>。写给编辑器看的，让它帮你检查传参对不对。你以后在 AI 生成的代码里看到 <code>interface</code>，就知道它是在描述'这个数据长什么样'。"</p>
+</blockquote>
+
+<p>补充提一下 <code>.tsx</code> vs <code>.jsx</code>：</p>
+
+<ul>
+  <li><code>.jsx</code> = JavaScript + JSX，没有类型检查</li>
+  <li><code>.tsx</code> = TypeScript + JSX，有类型检查（多了 interface 这些东西）</li>
+  <li>现在大部分项目都用 <code>.tsx</code>，AI 生成的代码也基本都是 TypeScript</li>
+</ul>
+
+<div class="task-list" style="background:#e0f2fe;border-color:#7dd3fc;">
+  <p><strong>互动 ②（预测结果）</strong>：「现在卡片显示什么完全由外面决定。但实际的看板上，Issue 的状态是会变的——你点一下就能把"进行中"改成"已完成"。这种"会变的数据"要怎么处理？我先用最直觉的方式写——普通变量，你猜点按钮会怎样？」→ 让学员猜 → 运行验证</p>
+</div>
+
+<!-- 第三步：State -->
+<h3><span class="timeline">0:28-0:45</span> 第三步：加 State — 让组件能"记东西"</h3>
+<p><strong>教学目标</strong>：理解"State 变了，页面自动更新"。这是全课最重要的部分。</p>
+
+<h4>(a) 先演示"错误的方式" — 普通变量（3min）</h4>
+
+<pre><code>function IssueCard() {
+  let status = "进行中";
+  return (
+    &lt;div className="issue-card"&gt;
+      &lt;h3&gt;首页加载速度太慢&lt;/h3&gt;
+      &lt;p&gt;状态：{status}&lt;/p&gt;
+      &lt;button onClick={() =&gt; {
+        status = "已完成";
+        console.log(status);
+      }}&gt;标记完成&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+
+<ul>
+  <li>点按钮 → 页面没反应</li>
+  <li>打开 Console → "数据确实变了（Console 里能看到'已完成'），但页面不动"</li>
+  <li>类比：就像你在<strong>私聊里</strong>跟同事说"这个需求改了"，但没有更新飞书文档——你知道改了，同事也知道，但其他人打开文档看到的还是旧的。普通变量就是"私聊"，React 看不到；<code>useState</code> 就是"直接改飞书文档"，所有人（页面）自动看到最新的</li>
+</ul>
+
+<h4>(b) 再演示"正确的方式" — useState（5min）</h4>
+
+<pre><code>function IssueCard() {
+  const [status, setStatus] = useState("进行中");
+  return (
+    &lt;div className="issue-card"&gt;
+      &lt;h3&gt;首页加载速度太慢&lt;/h3&gt;
+      &lt;p&gt;状态：{status}&lt;/p&gt;
+      &lt;button onClick={() =&gt; setStatus("已完成")}&gt;标记完成&lt;/button&gt;
+      &lt;button onClick={() =&gt; setStatus("进行中")}&gt;重新打开&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+
+<ul>
+  <li>点"标记完成" → 状态变了！点"重新打开" → 又变回来了</li>
+  <li>类比：<code>setStatus</code> 就是直接改飞书文档——你一改，所有打开这个文档的人（页面上的所有组件）自动看到最新内容</li>
+  <li>拆解 useState 写法：<code>const [当前值, 修改函数] = useState(初始值)</code></li>
+</ul>
+
+<h4>(c) 加更多功能——完整的 Issue 卡片（4min）</h4>
+
+<pre><code>function IssueCard({ title, label, assignee }) {
+  const [status, setStatus] = useState("待处理");
+
+  return (
+    &lt;div className="issue-card"&gt;
+      &lt;div className="card-header"&gt;
+        &lt;span className="label"&gt;{label}&lt;/span&gt;
+        &lt;span className="status"&gt;{status}&lt;/span&gt;
+      &lt;/div&gt;
+      &lt;h3&gt;{title}&lt;/h3&gt;
+      &lt;p&gt;负责人：{assignee}&lt;/p&gt;
+      &lt;div&gt;
+        &lt;button onClick={() =&gt; setStatus("待处理")}&gt;待处理&lt;/button&gt;
+        &lt;button onClick={() =&gt; setStatus("进行中")}&gt;进行中&lt;/button&gt;
+        &lt;button onClick={() =&gt; setStatus("已完成")}&gt;已完成&lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+
+<ul>
+  <li>注意这里 Props 和 State 同时存在——<code>title</code>、<code>label</code>、<code>assignee</code> 是 Props（外面传的，不会变），<code>status</code> 是 State（用户可以切换）</li>
+  <li>放 3 张卡片出来，每张卡片的状态<strong>互相独立</strong>——点这张的"已完成"不影响另一张</li>
+  <li>强调：你只管改数据（setStatus），React 自动更新页面</li>
+</ul>
+
+<h4>(d) 渲染流程串讲（5min）</h4>
+
+<p>结合刚才的操作，画出渲染 5 步（板书或飞书文档）：</p>
+
+<pre>1. 用户点了"已完成"按钮
+2. onClick 触发，调用 setStatus("已完成")
+3. React 收到通知："文档变了"
+4. React 重新执行 IssueCard 函数，算出新的页面内容
+5. React 对比新旧内容，只更新变了的部分（"进行中"变成"已完成"）</pre>
+
+<ul>
+  <li>Figma 类比：改 Master Component 的属性 → 所有 Instance 自动刷新</li>
+  <li>关键点：React 不会刷新整个页面，只更新变化的部分</li>
+</ul>
+
+<div class="task-list" style="background:#e0f2fe;border-color:#7dd3fc;">
+  <p><strong>互动 ③（选择题）</strong>：「Props 和 State 都是数据，区别是什么？」</p>
+  <p>A. Props 是数字，State 是文字</p>
+  <p>B. Props 是外面传的，State 是自己管的</p>
+  <p>C. 没区别</p>
+  <p>→ 群里打 ABC → 公布答案 B，展开讲解</p>
+</div>
+
+<!-- 第四步：组合 -->
+<h3><span class="timeline">0:45-0:52</span> 第四步：组合起来 — 状态提升 + 筛选 + 回看 Demo 项目</h3>
+
+<p><strong>教学目标</strong>：理解"State 提升"——数据该放在谁那里；把今天学的概念和 Demo 项目对应起来</p>
+
+<h4>(a) 引出问题——为什么要提升 State（2min）</h4>
+
+<blockquote>
+  <p>"现在我想加一个筛选功能——点'已完成'只显示已完成的卡片。但问题来了：status 存在每张卡片自己的 State 里，App 根本看不到。就像三个员工各自记了自己的进度，但经理不知道——经理怎么做汇总？"</p>
+  <p>"答案是：<strong>把 status 交给 App 来管</strong>。卡片想改状态，就通知 App；App 统一管理所有卡片的状态，也就能做筛选了。这叫 <strong>State 提升</strong>。"</p>
+</blockquote>
+
+<h4>(b) 改造代码（3min）</h4>
+
+<pre><code>// status 从卡片自己的 State → 提升到 App 统一管理
+
+type IssueStatus = "待处理" | "进行中" | "已完成";
+
+interface Issue {
+  id: number;
+  title: string;
+  label: string;
+  assignee: string;
+  status: IssueStatus;
+}
+
+// IssueCard 不再自己管 status
+// 从 Props 接收 status，改的时候通过 onStatusChange 通知 App
+function IssueCard({ title, label, assignee, status, onStatusChange }) {
+  return (
+    &lt;div className="issue-card"&gt;
+      &lt;div className="card-header"&gt;
+        &lt;span className="label"&gt;{label}&lt;/span&gt;
+        &lt;span className="status"&gt;{status}&lt;/span&gt;
+      &lt;/div&gt;
+      &lt;h3&gt;{title}&lt;/h3&gt;
+      &lt;p&gt;负责人：{assignee}&lt;/p&gt;
+      &lt;div&gt;
+        &lt;button onClick={() =&gt; onStatusChange("待处理")}&gt;待处理&lt;/button&gt;
+        &lt;button onClick={() =&gt; onStatusChange("进行中")}&gt;进行中&lt;/button&gt;
+        &lt;button onClick={() =&gt; onStatusChange("已完成")}&gt;已完成&lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+}
+
+// 筛选栏——按状态筛选
+function FilterBar({ current, onChange }) {
+  const options = ["全部", "待处理", "进行中", "已完成"];
+  return (
+    &lt;div className="filter-bar"&gt;
+      {options.map((opt) =&gt; (
+        &lt;button
+          key={opt}
+          className={opt === current ? "active" : ""}
+          onClick={() =&gt; onChange(opt)}
+        &gt;{opt}&lt;/button&gt;
+      ))}
+    &lt;/div&gt;
+  );
+}
+
+// App 统一管理所有 Issue 的数据和状态
+function App() {
+  const [filter, setFilter] = useState("全部");
+  const [issues, setIssues] = useState&lt;Issue[]&gt;([
+    { id: 1, title: "首页加载速度太慢", label: "Bug", assignee: "小明", status: "待处理" },
+    { id: 2, title: "支持暗黑模式", label: "需求", assignee: "小红", status: "进行中" },
+    { id: 3, title: "登录页文案优化", label: "设计", assignee: "大伟", status: "待处理" },
+  ]);
+
+  const handleStatusChange = (id, newStatus) =&gt; {
+    setIssues((prev) =&gt;
+      prev.map((issue) =&gt;
+        issue.id === id ? { ...issue, status: newStatus } : issue
+      )
+    );
+  };
+
+  const filtered = filter === "全部"
+    ? issues
+    : issues.filter((issue) =&gt; issue.status === filter);
+
+  return (
+    &lt;div&gt;
+      &lt;h1&gt;Issue 看板&lt;/h1&gt;
+      &lt;FilterBar current={filter} onChange={setFilter} /&gt;
+      {filtered.map((issue) =&gt; (
+        &lt;IssueCard key={issue.id} {...issue}
+          onStatusChange={(s) =&gt; handleStatusChange(issue.id, s)} /&gt;
+      ))}
+    &lt;/div&gt;
+  );
+}</code></pre>
+
+<p><strong>现场演示</strong>：</p>
+<ol>
+  <li>点卡片上的"已完成" → 状态变了</li>
+  <li>点筛选栏的"已完成" → 只显示已完成的卡片</li>
+  <li>点"全部" → 回到全部</li>
+</ol>
+
+<p><strong>讲解 State 提升</strong>（这是全课第二个重要概念，要讲透）：</p>
+
+<blockquote>
+  <p>"刚才第三步里，每张卡片自己管自己的 status——就像三个员工各自在自己的小本本上记进度。这样有什么问题？"</p>
+  <p>"经理（App）看不到任何人的进度。你让经理筛选'已完成的任务'，他做不到——因为数据不在他手里。"</p>
+</blockquote>
+
+<p>板书画对比：</p>
+
+<pre>【改之前——status 在卡片自己手里】
+
+App                          ← 不知道每张卡片什么状态，没法筛选
+├── IssueCard (status: ?)    ← 自己管自己的 status
+├── IssueCard (status: ?)    ← 自己管自己的 status
+└── IssueCard (status: ?)    ← 自己管自己的 status
+
+【改之后——status 提升到 App】
+
+App (issues: [{status: "待处理"}, {status: "进行中"}, ...])  ← 全都在这里，能筛选！
+├── IssueCard ← status 从 Props 接收，要改就喊 onStatusChange
+├── IssueCard ← 同上
+└── IssueCard ← 同上</pre>
+
+<p>逐步讲解改了什么（对着代码说）：</p>
+
+<ol>
+  <li><strong>IssueCard 里删掉了 <code>useState</code></strong>——它不再自己管 status 了</li>
+  <li><strong>IssueCard 多了两个 Props</strong>：<code>status</code>（从外面接收当前状态）和 <code>onStatusChange</code>（要改的时候调这个函数通知 App）</li>
+  <li><strong>App 里用 <code>useState</code> 管了整个 issues 数组</strong>——每条 Issue 包含 status 字段</li>
+  <li><strong>App 写了 <code>handleStatusChange</code></strong>——某张卡片喊"我要变成已完成"，App 就去数组里找到那条，把 status 改掉</li>
+  <li><strong>筛选就变得简单了</strong>——App 手里有所有数据，<code>issues.filter(issue =&gt; issue.status === filter)</code> 一行搞定</li>
+</ol>
+
+<blockquote>
+  <p>"这个模式叫 <strong>State 提升</strong>——当多个组件需要共享或协调同一份数据时，把数据放到它们共同的父组件里管理。子组件通过 Props 接收数据，通过回调函数（onXxx）通知父组件修改。"</p>
+  <p>"你在 Demo 项目里已经见过这个模式了——ChatInput 自己不存消息，用户点发送时调 <code>onSend</code> 通知 App，App 用 <code>setMessages</code> 统一管理所有消息。和我们刚才做的一模一样。"</p>
+</blockquote>
+
+<p>简单总结规则：</p>
+<ul>
+  <li><strong>数据只有一个组件用</strong> → State 放在那个组件里（第三步的写法）</li>
+  <li><strong>数据要被多个组件共享，或者父组件需要看到</strong> → State 提升到共同的父组件（现在的写法）</li>
+  <li>子组件通过 <code>onXxx</code> Props 通知父组件"我要改数据" → 父组件调 <code>setXxx</code> 更新 → 新数据通过 Props 流回子组件 → 页面更新</li>
+</ul>
+
+<h4>(c) 画组件树 + 对比 Demo 项目（2min）</h4>
+
+<pre>App（有 State：filter, issues）
+├── FilterBar（接收 Props：current, onChange）
+└── IssueCard × N（接收 Props：title, label, status, onStatusChange）</pre>
+
+<p>打开 Demo 项目的 App.tsx，对比：</p>
+
+<pre>App（有 State：messages, loading）
+├── ChatWindow（接收 Props：messages, loading）
+│   └── MessageBubble（接收 Props：message）
+└── ChatInput（接收 Props：onSend, disabled）</pre>
+
+<ul>
+  <li><strong>关键时刻</strong>："你刚才从零搭的 Issue 看板，和 Demo 聊天项目的结构是同一个模式"</li>
+  <li>逐行指认：
+    <ul>
+      <li>"这两行是 State"——<code>messages</code>、<code>loading</code></li>
+      <li>"这里是把 State 当 Props 传给子组件"——<code>&lt;ChatWindow messages={messages} /&gt;</code></li>
+      <li>"handleSend 里调了 setMessages → 页面自动更新"——和你刚才点"已完成"调 handleStatusChange 是一回事</li>
+      <li>"ChatInput 通过 onSend 通知 App"——和 IssueCard 通过 onStatusChange 通知 App 是同一个模式</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="task-list" style="background:#e0f2fe;border-color:#7dd3fc;">
+  <p><strong>互动 ④（预测）</strong>：「Demo 项目里有一段 useEffect 代码——页面一打开就自动去后端拿欢迎消息。你觉得这件事用 State 能做吗？State 管的是什么？」→ 群里打字 → 引出 useEffect</p>
+</div>
+
+<!-- useEffect -->
+<h3><span class="timeline">0:52-0:56</span> useEffect — 页面加载后的自动触发器</h3>
+
+<ul>
+  <li>"State 管的是'数据变了怎么办'。但有时候你需要页面一打开就自动做一些事——比如去后端拿数据。useEffect 就是这个自动触发器。"</li>
+  <li>Figma 类比：原型里的 On Load 交互——页面一打开就自动播放动画</li>
+  <li><code>[]</code> = 只在第一次加载时跑一次</li>
+</ul>
+
+<p>演示：在 App 里加 useEffect：</p>
+
+<pre><code>useEffect(() =&gt; {
+  console.log("Issue 看板加载完毕！");
+}, []);</code></pre>
+
+<ul>
+  <li>刷新页面 → Console 打出一行 → "不需要点任何按钮，加载完就自动跑了"</li>
+  <li>"真实项目里，这里会去后端拿 Issue 列表——而不是像我们现在这样把数据写死在代码里"</li>
+  <li>指回 Demo 项目的 useEffect：<code>fetchWelcome()</code> 就是页面一打开就去拿欢迎消息——同一个模式</li>
+  <li>不深入讲 useEffect 的更多用法，课后番外篇有详细讲解</li>
+</ul>
+
+<!-- 总结 -->
+<h3><span class="timeline">0:56-1:00</span> 总结 + 作业 + 预告</h3>
+
+<p><strong>总结三张卡</strong>（投屏展示）：</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>概念</th>
+      <th>一句话</th>
+      <th>Figma 类比</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>组件</strong></td>
+      <td>一个函数，return 页面内容。定义一次，用多次</td>
+      <td>Master Component</td>
+    </tr>
+    <tr>
+      <td><strong>Props</strong></td>
+      <td>外面传进来的参数，组件自己不能改</td>
+      <td>Component Properties</td>
+    </tr>
+    <tr>
+      <td><strong>State</strong></td>
+      <td>组件内部的数据源，改了页面自动刷新（必须用 setXxx）</td>
+      <td>&mdash;</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>作业</strong>（发群里）：</p>
+
+<ol>
+  <li>在 StackBlitz 上把课上的 Issue 看板代码跑起来，给 IssueCard 加一个新的 Props——<code>priority</code>（P0/P1/P2），在卡片上显示优先级</li>
+  <li>给看板加一个"已完成计数"——用 State 记录一共有几张卡片被标记为"已完成"</li>
+  <li>回到 Demo 项目，找出所有 <code>useState</code>，标注每个 State 属于哪个组件、初始值是什么</li>
+</ol>
+
+<p><strong>预告下节课</strong>：后端 — 数据存在哪、API 是什么。今天的 Issue 数据都写死在代码里，刷新就恢复原样。下节课讲怎么从服务器拿数据、怎么把修改存回去。</p>
+
+<p><strong>推荐课后补充阅读</strong>：番外篇——有更多交互 Demo，适合课后巩固。</p>
+
+<!-- 备课检查清单 -->
+<h2>备课检查清单</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>项目</th>
+      <th>状态</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>StackBlitz 空白 React 项目能打开、能运行</td>
+      <td>&#9744;</td>
+    </tr>
+    <tr>
+      <td>每一步代码都提前写过一遍，live coding 流畅</td>
+      <td>&#9744;</td>
+    </tr>
+    <tr>
+      <td>Demo 项目 App.tsx 能打开（用于最后对比环节）</td>
+      <td>&#9744;</td>
+    </tr>
+    <tr>
+      <td>4 个互动问题已准备好</td>
+      <td>&#9744;</td>
+    </tr>
+    <tr>
+      <td>总结三张卡的截图/文档已做好</td>
+      <td>&#9744;</td>
+    </tr>
+    <tr>
+      <td>作业文本已写好，可直接发群</td>
+      <td>&#9744;</td>
+    </tr>
+    <tr>
+      <td>录屏工具已准备</td>
+      <td>&#9744;</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- 应急预案 -->
+<h2>应急预案</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>情况</th>
+      <th>应对</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>StackBlitz 打不开或很慢</td>
+      <td>切到本地 VS Code + Vite 项目（提前准备好）</td>
+    </tr>
+    <tr>
+      <td>Live coding 打错字/报错</td>
+      <td>故意化为教学机会："这就是代码报错的样子，看 Console 里的提示"</td>
+    </tr>
+    <tr>
+      <td>学员对上节课内容没印象</td>
+      <td>开场多花 2 分钟回顾，砍掉 useEffect 环节（课后看番外）</td>
+    </tr>
+    <tr>
+      <td>互动环节没人回答</td>
+      <td>自问自答，不要冷场。给出 2 个选项降低回答门槛</td>
+    </tr>
+    <tr>
+      <td>课程进度快（提前完成）</td>
+      <td>补充讲 useEffect 的第二种用法 <code>[value]</code>，或让学员提问</td>
+    </tr>
+    <tr>
+      <td>课程进度慢</td>
+      <td>砍 useEffect 环节（5min），课后发番外链接补充。渲染流程串讲可简化</td>
+    </tr>
+    <tr>
+      <td>学员问"这跟 Vue/其他框架什么区别"</td>
+      <td>简答：思路类似（组件 + 状态驱动），语法不同。本课不展开</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- 关键原则 -->
+<h2>关键原则</h2>
+
+<ol>
+  <li><strong>渐进式构建</strong>：从最简单的组件开始，每步只加一个概念，不跳跃</li>
+  <li><strong>先错后对</strong>：State 环节先演示普通变量（错误的方式），让学员感受"为什么不行"，再给出 useState（正确的方式）</li>
+  <li><strong>一个主题贯穿全课</strong>：Issue 看板从头写到尾，不换例子</li>
+  <li><strong>最后回到 Demo 项目</strong>：让学员发现"我刚写的结构和 Demo 项目一样"，这是全课的 aha moment</li>
+  <li><strong>不深挖语法</strong>：TypeScript 类型标注、箭头函数、解构赋值等只需要让学员认得出来、知道大概干嘛的就行，不讲底层原理。具体对照见"补充说明"章节</li>
+  <li><strong>互动是防走神的</strong>：不是测验，不打分，答错也没关系。目的是让学员保持参与感</li>
+</ol>
+
+<!-- Live Coding 代码参考 -->
+<h2>Live Coding 代码参考（完整版）</h2>
+
+<p>以下是课上每一步的完整可运行代码（TypeScript + React），供讲师对照。课堂上建议从零开始写，不要直接复制。</p>
+
+<h3>第一步：静态组件</h3>
+
+<pre><code>// App.tsx
+export default function App() {
+  return &lt;IssueCard /&gt;;
+}
+
+function IssueCard() {
+  return (
+    &lt;div className="issue-card"&gt;
+      &lt;span className="label"&gt;Bug&lt;/span&gt;
+      &lt;h3&gt;首页加载速度太慢&lt;/h3&gt;
+      &lt;p&gt;负责人：小明&lt;/p&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+
+<h3>第二步：加 Props（TypeScript 版）</h3>
+
+<pre><code>// App.tsx
+
+// 用 interface 定义 Props 的类型——每个字段是什么类型
+interface IssueCardProps {
+  title: string;
+  label: string;
+  assignee: string;
+}
+
+// { title, label, assignee } 是从 Props 里"拆出来"用
+// 这个写法叫解构，就像拆快递——把箱子里的东西一个个拿出来
+function IssueCard({ title, label, assignee }: IssueCardProps) {
+  return (
+    &lt;div className="issue-card"&gt;
+      &lt;span className="label"&gt;{label}&lt;/span&gt;
+      &lt;h3&gt;{title}&lt;/h3&gt;
+      &lt;p&gt;负责人：{assignee}&lt;/p&gt;
+    &lt;/div&gt;
+  );
+}
+
+// 一个组件，三张不同的卡片
+export default function App() {
+  return (
+    &lt;div&gt;
+      &lt;IssueCard title="首页加载速度太慢" label="Bug" assignee="小明" /&gt;
+      &lt;IssueCard title="支持暗黑模式" label="需求" assignee="小红" /&gt;
+      &lt;IssueCard title="登录页文案优化" label="设计" assignee="大伟" /&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+
+<h3>第三步 (a)：普通变量（错误示范）</h3>
+
+<pre><code>// App.tsx
+export default function App() {
+  return &lt;IssueCard /&gt;;
+}
+
+function IssueCard() {
+  let status = "进行中";
+  return (
+    &lt;div className="issue-card"&gt;
+      &lt;h3&gt;首页加载速度太慢&lt;/h3&gt;
+      &lt;p&gt;状态：{status}&lt;/p&gt;
+      &lt;button onClick={() =&gt; {
+        status = "已完成";
+        console.log("变量值:", status); // Console 能看到，但页面不动
+      }}&gt;标记完成&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+
+<h3>第三步 (b)：useState（正确方式）</h3>
+
+<pre><code>// App.tsx
+import { useState } from "react";
+
+export default function App() {
+  return &lt;IssueCard /&gt;;
+}
+
+function IssueCard() {
+  const [status, setStatus] = useState("进行中");
+  return (
+    &lt;div className="issue-card"&gt;
+      &lt;h3&gt;首页加载速度太慢&lt;/h3&gt;
+      &lt;p&gt;状态：{status}&lt;/p&gt;
+      &lt;button onClick={() =&gt; setStatus("已完成")}&gt;标记完成&lt;/button&gt;
+      &lt;button onClick={() =&gt; setStatus("进行中")}&gt;重新打开&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+
+<h3>第三步 (c)：Props + State 同时存在</h3>
+
+<pre><code>// App.tsx
+import { useState } from "react";
+
+interface IssueCardProps {
+  title: string;
+  label: string;
+  assignee: string;
+}
+
+function IssueCard({ title, label, assignee }: IssueCardProps) {
+  const [status, setStatus] = useState("待处理");
+
+  return (
+    &lt;div className="issue-card"&gt;
+      &lt;div className="card-header"&gt;
+        &lt;span className="label"&gt;{label}&lt;/span&gt;
+        &lt;span className="status"&gt;{status}&lt;/span&gt;
+      &lt;/div&gt;
+      &lt;h3&gt;{title}&lt;/h3&gt;
+      &lt;p&gt;负责人：{assignee}&lt;/p&gt;
+      &lt;div&gt;
+        &lt;button onClick={() =&gt; setStatus("待处理")}&gt;待处理&lt;/button&gt;
+        &lt;button onClick={() =&gt; setStatus("进行中")}&gt;进行中&lt;/button&gt;
+        &lt;button onClick={() =&gt; setStatus("已完成")}&gt;已完成&lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+}
+
+export default function App() {
+  return (
+    &lt;div&gt;
+      &lt;h1&gt;Issue 看板&lt;/h1&gt;
+      &lt;IssueCard title="首页加载速度太慢" label="Bug" assignee="小明" /&gt;
+      &lt;IssueCard title="支持暗黑模式" label="需求" assignee="小红" /&gt;
+      &lt;IssueCard title="登录页文案优化" label="设计" assignee="大伟" /&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+
+<h3>第四步：组合成完整 App + 状态提升 + 筛选 + useEffect</h3>
+
+<pre><code>// App.tsx
+import { useState, useEffect } from "react";
+
+/* ========== 类型定义 ========== */
+
+type IssueStatus = "待处理" | "进行中" | "已完成";
+
+interface Issue {
+  id: number;
+  title: string;
+  label: string;
+  assignee: string;
+  status: IssueStatus;
+}
+
+interface IssueCardProps {
+  title: string;
+  label: string;
+  assignee: string;
+  status: IssueStatus;
+  onStatusChange: (newStatus: IssueStatus) =&gt; void;
+}
+
+interface FilterBarProps {
+  current: string;
+  onChange: (value: string) =&gt; void;
+}
+
+/* ========== 子组件 ========== */
+
+// IssueCard 不再自己管 status——从 Props 接收，改的时候通知 App
+function IssueCard({ title, label, assignee, status, onStatusChange }: IssueCardProps) {
+  return (
+    &lt;div className="issue-card"&gt;
+      &lt;div className="card-header"&gt;
+        &lt;span className="label"&gt;{label}&lt;/span&gt;
+        &lt;span className="status"&gt;{status}&lt;/span&gt;
+      &lt;/div&gt;
+      &lt;h3&gt;{title}&lt;/h3&gt;
+      &lt;p&gt;负责人：{assignee}&lt;/p&gt;
+      &lt;div&gt;
+        &lt;button onClick={() =&gt; onStatusChange("待处理")}&gt;待处理&lt;/button&gt;
+        &lt;button onClick={() =&gt; onStatusChange("进行中")}&gt;进行中&lt;/button&gt;
+        &lt;button onClick={() =&gt; onStatusChange("已完成")}&gt;已完成&lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+}
+
+function FilterBar({ current, onChange }: FilterBarProps) {
+  const options = ["全部", "待处理", "进行中", "已完成"];
+  return (
+    &lt;div className="filter-bar"&gt;
+      {options.map((opt) =&gt; (
+        &lt;button
+          key={opt}
+          className={opt === current ? "active" : ""}
+          onClick={() =&gt; onChange(opt)}
+        &gt;
+          {opt}
+        &lt;/button&gt;
+      ))}
+    &lt;/div&gt;
+  );
+}
+
+/* ========== 根组件 ========== */
+
+export default function App() {
+  const [filter, setFilter] = useState("全部");
+
+  // 所有 Issue 的数据和状态都在 App 这里管理
+  const [issues, setIssues] = useState&lt;Issue[]&gt;([
+    { id: 1, title: "首页加载速度太慢", label: "Bug", assignee: "小明", status: "待处理" },
+    { id: 2, title: "支持暗黑模式", label: "需求", assignee: "小红", status: "进行中" },
+    { id: 3, title: "登录页文案优化", label: "设计", assignee: "大伟", status: "待处理" },
+  ]);
+
+  // 页面加载后自动执行——真实项目里这里会去后端拿 Issue 列表
+  useEffect(() =&gt; {
+    console.log("Issue 看板加载完毕！");
+  }, []);
+
+  // 某张卡片的状态变了 → 更新 issues 数组里对应的那条
+  const handleStatusChange = (id: number, newStatus: IssueStatus) =&gt; {
+    setIssues((prev) =&gt;
+      prev.map((issue) =&gt;
+        issue.id === id ? { ...issue, status: newStatus } : issue
+      )
+    );
+  };
+
+  // 按状态筛选
+  const filtered =
+    filter === "全部"
+      ? issues
+      : issues.filter((issue) =&gt; issue.status === filter);
+
+  return (
+    &lt;div className="app"&gt;
+      &lt;h1&gt;Issue 看板&lt;/h1&gt;
+      &lt;FilterBar current={filter} onChange={setFilter} /&gt;
+      {filtered.map((issue) =&gt; (
+        &lt;IssueCard
+          key={issue.id}
+          title={issue.title}
+          label={issue.label}
+          assignee={issue.assignee}
+          status={issue.status}
+          onStatusChange={(newStatus) =&gt; handleStatusChange(issue.id, newStatus)}
+        /&gt;
+      ))}
+    &lt;/div&gt;
+  );
+}</code></pre>
+
+<!-- 补充：写法对照 -->
+<h2>补充说明：同一件事的不同写法</h2>
+
+<p>课堂上用 <code>function</code> 写法教学，但学员在 Demo 项目或 AI 生成的代码里会看到其他写法。这里统一对照，讲师可以在合适的时机穿插提一下——"这两种写法是同一个意思，你认得出来就行"。</p>
+
+<h3>1. 定义组件的两种写法</h3>
+
+<pre><code>// 写法一：function 声明（课上用的，最直观）
+function IssueCard({ title, label }: IssueCardProps) {
+  return &lt;div&gt;{title}&lt;/div&gt;;
+}
+
+// 写法二：箭头函数 + const（AI 和很多项目常用）
+// 完全等价，只是写法不同
+const IssueCard = ({ title, label }: IssueCardProps) =&gt; {
+  return &lt;div&gt;{title}&lt;/div&gt;;
+};
+
+// 箭头函数的简写：如果 return 后面只有一个表达式，可以省略 { } 和 return
+const IssueCard = ({ title, label }: IssueCardProps) =&gt; (
+  &lt;div&gt;{title}&lt;/div&gt;
+);</code></pre>
+
+<blockquote>
+  <p><strong>记住</strong>：<code>function Xxx()</code> 和 <code>const Xxx = () =&gt;</code> 是同一件事的两种写法。你在代码里看到 <code>=&gt;</code> 不要慌，它就是一个函数。</p>
+</blockquote>
+
+<h3>2. 事件处理的两种写法</h3>
+
+<pre><code>// 写法一：内联箭头函数（课上用的，适合简单逻辑）
+&lt;button onClick={() =&gt; setStatus("已完成")}&gt;标记完成&lt;/button&gt;
+
+// 写法二：单独定义一个函数，再传给 onClick（适合逻辑复杂的情况）
+function IssueCard() {
+  const [status, setStatus] = useState("待处理");
+
+  const handleComplete = () =&gt; {
+    setStatus("已完成");
+    console.log("Issue 已完成");
+  };
+
+  return &lt;button onClick={handleComplete}&gt;标记完成&lt;/button&gt;;
+}</code></pre>
+
+<h3>3. TypeScript 类型标注</h3>
+
+<pre><code>// 不用 TypeScript（.jsx 文件）——不写类型，也能跑
+function IssueCard({ title, label, assignee }) {
+  return &lt;h3&gt;{title}&lt;/h3&gt;;
+}
+
+// 用 TypeScript（.tsx 文件）——加上类型，编辑器能帮你检查传参对不对
+interface IssueCardProps {
+  title: string;       // 字符串
+  label: string;
+  assignee: string;
+  priority?: number;   // 加 ? 表示"可以不传"
+}
+
+function IssueCard({ title, label, assignee, priority }: IssueCardProps) {
+  return &lt;h3&gt;{title}&lt;/h3&gt;;
+}
+
+// 用 TypeScript 定义 State 的类型
+const [status, setStatus] = useState&lt;string&gt;("待处理");
+// 大多数情况 TS 能自动推断，不需要手动写 &lt;string&gt;
+const [count, setCount] = useState(0); // TS 自动知道 count 是 number</code></pre>
+
+<blockquote>
+  <p><strong>TypeScript 对学员来说只需要知道两件事：</strong></p>
+  <ol>
+    <li><code>interface</code> 是在定义"这个数据长什么样"——有哪些字段，每个字段是什么类型</li>
+    <li>函数参数后面的 <code>: XxxProps</code> 是在告诉编辑器"这个函数期望接收什么数据"——传错了会画红线提醒你</li>
+  </ol>
+</blockquote>
+
+<h3>4. export 的两种写法</h3>
+
+<pre><code>// 写法一：export default（一个文件只能有一个 default）
+export default function App() { ... }
+// 导入时名字随便起：
+// import App from "./App"
+// import MyApp from "./App"  ← 也行
+
+// 写法二：具名 export（一个文件可以有多个）
+export function IssueCard() { ... }
+export function FilterBar() { ... }
+// 导入时必须用大括号，名字必须对上：
+// import { IssueCard, FilterBar } from "./components"</code></pre>
+
+<div class="footer">
+  <p>编程入门课程 &copy; 2026</p>
+</div>
+
+</div>
+</body>
+</html>
