@@ -2,7 +2,7 @@
 // 课上从这里开始，一步步加功能
 
 import { IssueCard } from './components/issue-card';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 export default function App() {
   const [issues, setIssues] = useState([
@@ -13,11 +13,11 @@ export default function App() {
     {label: 'Bug', title: '用户中心功能异常', assignee: '小明', status: '进行中'},
   ])
 
-  const handleEffect = () => {
-    alert('欢迎来到 issue 看板')
-  }
+  // const handleEffect = () => {
+  //   alert('欢迎来到 issue 看板')
+  // }
 
-  useEffect(handleEffect, [])
+  // useEffect(handleEffect, [])
 
   return (
     <div className="app">
