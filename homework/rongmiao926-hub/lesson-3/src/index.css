@@ -1,0 +1,164 @@
+/*
+ * Issue 看板样式
+ *
+ * 这些样式已经提前写好了。课上讲师只需要解释：
+ * JSX 里的 className="xxx" 对应到这里的 .xxx { ... }
+ *
+ * 就像 Figma 里给图层命名，然后在 Design 面板里设置属性：
+ *   图层名 = className
+ *   Design 面板 = CSS 规则
+ */
+
+/* ========== 全局基础 ========== */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: #f5f5f5;      /* 页面底色：浅灰 */
+  color: #1a1b1d;           /* 文字颜色：深灰 */
+  padding: 24px;
+}
+
+/* ========== 页面容器 ========== */
+
+/*
+ * className="app" → .app
+ * 限制最大宽度、居中——就像 Figma 里的 Frame 设置了 max-width + auto margin
+ */
+.app {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+h1 {
+  font-size: 1.8em;
+  margin-bottom: 20px;
+}
+
+/* ========== Issue 卡片 ========== */
+
+/*
+ * className="issue-card" → .issue-card
+ * 白色背景、圆角、阴影——一张卡片的基本样式
+ */
+.issue-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;      /* 圆角 */
+  padding: 16px 20px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);  /* 轻微阴影 */
+}
+
+.issue-card h3 {
+  font-size: 1em;
+  font-weight: 600;
+  margin: 8px 0 6px;
+}
+
+.issue-card p {
+  font-size: 0.88em;
+  color: #6b7280;           /* 次要文字用浅色 */
+}
+
+/* ========== 卡片头部：标签 + 状态并排 ========== */
+
+/*
+ * className="card-header" → .card-header
+ * display: flex 让子元素横向排列（标签和状态并排）
+ */
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;                  /* 子元素间距 */
+}
+
+/* ========== 标签（Bug / 需求 / 设计）========== */
+
+/*
+ * className="label" → .label
+ * 小药丸形状：圆角 + 小字 + 背景色
+ */
+.label {
+  display: inline-block;
+  font-size: 0.75em;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 20px;       /* 大圆角 = 药丸形 */
+  background: #e0e7ff;       /* 浅紫蓝 */
+  color: #3730a3;            /* 深紫蓝 */
+}
+
+/* ========== 状态（待处理 / 进行中 / 已完成）========== */
+
+.status {
+  font-size: 0.75em;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 20px;
+  background: #fef3c7;       /* 浅黄 */
+  color: #92400e;            /* 深棕 */
+}
+
+.priority {
+  font-size: 0.75em;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 20px;
+}
+
+.priority-p0 {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.priority-p1 {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.priority-p2 {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+/* ========== 按钮 ========== */
+
+button {
+  padding: 6px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.82em;
+  cursor: pointer;            /* 鼠标变成手指 */
+  transition: background 0.15s; /* 悬停时平滑过渡 */
+  margin-right: 6px;
+  margin-top: 10px;
+}
+
+button:hover {
+  background: #f3f4f6;       /* 悬停变深一点 */
+}
+
+/* ========== 筛选栏 ========== */
+
+.filter-bar {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.filter-bar button {
+  margin-top: 0;
+}
+
+.filter-bar button.active {
+  background: #6366f1;       /* 选中的按钮：紫色 */
+  color: #fff;
+  border-color: #6366f1;
+}
