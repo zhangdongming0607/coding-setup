@@ -5,6 +5,28 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>第 4 课：后端 — 数据存在哪、API 是什么</title>
 <link rel="stylesheet" href="style.css">
+<style>
+.cheatsheet {
+  background: #f0f7ff;
+  border-left: 4px solid #3b82f6;
+  border-radius: 6px;
+  padding: 16px 20px;
+  margin: 16px 0;
+}
+.cheatsheet h4 {
+  margin: 0 0 12px 0;
+  color: #1d4ed8;
+  font-size: 1em;
+}
+.cheatsheet p {
+  margin: 0 0 10px 0;
+  line-height: 1.7;
+}
+.cheatsheet p:last-child {
+  margin-bottom: 0;
+  color: #555;
+}
+</style>
 </head>
 <body>
 <div class="container">
@@ -30,7 +52,11 @@
 
 <p>点按钮改了状态，<strong>刷新页面就没了</strong>——因为每次刷新，React 重新执行函数，<code>useState</code> 又从初始值开始。</p>
 
-<p>这就像在白板上写数字，擦掉重画，数字当然没了。</p>
+<p>想象你们用的 Meego。你在上面改了一个 Bug 的状态，团队里所有人刷新页面都能看到——不是因为你的电脑跟每个人的电脑直接连着，而是改动先发到 Meego 的服务器，服务器再返给所有人。如果没有服务器，你只能把数据用 U 盘拷给别人。</p>
+
+<p>这就是<strong>后端</strong>存在的意义：互联网上有无数个互不认识的客户端，需要一个"所有人都连着的中间人"来存数据、同步状态、定规则。</p>
+
+<p>今天我们做的 Issue 看板，目标就是一样——你改了一个 Bug 的状态，你的同事刷新页面也能看到，靠的就是这个中间人。</p>
 
 <blockquote>
   <p>真实的应用里，数据不写在前端代码里。数据存在<strong>后端</strong>——一个独立的程序，专门管数据。前端要数据就问后端要，前端要改数据就告诉后端去改。</p>
@@ -39,7 +65,7 @@
 <!-- 4.2 -->
 <h2>4.2 前端和后端各管什么</h2>
 
-<p>用餐厅来类比（第 1 课我们用餐厅讲过请求链路，今天<strong>进厨房看看里面怎么运作</strong>）：</p>
+<p>用 Meego 来类比：</p>
 
 <table>
   <thead>
@@ -52,24 +78,24 @@
   <tbody>
     <tr>
       <td><strong>前端</strong></td>
-      <td>餐厅大厅</td>
-      <td>菜单长什么样、桌椅怎么摆、客人怎么点菜——<strong>你看到的一切、你的操作</strong></td>
+      <td>Meego 客户端</td>
+      <td>Bug 列表长什么样、状态按钮在哪、筛选框怎么显示——<strong>你看到的一切、你的操作</strong></td>
     </tr>
     <tr>
       <td><strong>后端</strong></td>
-      <td>厨房 + 仓库</td>
-      <td>食材存在哪、今天有没有番茄、菜怎么做——<strong>数据存在哪、业务逻辑怎么算</strong></td>
+      <td>Meego 服务器</td>
+      <td>所有 Bug 数据存在哪、谁负责哪个模块、历史记录怎么查——<strong>数据存在哪、业务逻辑怎么算</strong></td>
     </tr>
     <tr>
       <td><strong>API</strong></td>
-      <td>传菜窗口</td>
-      <td>大厅和厨房之间的约定——点菜单怎么写、菜怎么递——<strong>前端和后端之间的通信规则</strong></td>
+      <td>客户端和服务器之间的通信协议</td>
+      <td>你点"已完成"，客户端按什么格式打包、发到哪个地址、服务器怎么回——<strong>前端和后端之间的通信规则</strong></td>
     </tr>
   </tbody>
 </table>
 
 <pre>┌─────────────────┐                        ┌─────────────────┐
-│   前端（大厅）    │      API（窗口）        │   后端（厨房）    │
+│ 前端（Meego客户端）│      API（通信协议）     │ 后端（Meego服务器）│
 │                 │                        │                 │
 │  显示页面        │ ──── 请求 ──────→       │  存数据          │
 │  响应用户操作     │                        │  处理业务逻辑     │
@@ -77,15 +103,17 @@
 └─────────────────┘                        └─────────────────┘</pre>
 
 <blockquote>
-  <p>回忆第 1 课的聊天 App——你点发送，前端通过 API 把消息发给后端，后端返回回复，前端再画到页面上。Network 面板里看到的那些请求，就是 API 调用。</p>
+  <p>你在 Meego 客户端点"已完成"，客户端（前端）通过 API 把改动发给 Meego 服务器（后端），服务器存好之后，你同事的客户端刷新一下也能看到。你在 Network 面板里看到的那些请求，就是 API 调用。</p>
 </blockquote>
 
 <!-- 4.3 -->
-<h2>4.3 两个终端：模拟大厅和厨房</h2>
+<h2>4.3 两个终端：模拟 Meego 客户端和服务器</h2>
 
-<p>前端和后端是<strong>两个独立的程序</strong>，要分别启动。就像餐厅大厅开门了不代表厨房也在运转——两边都得有人。</p>
+<p>前端和后端是<strong>两个独立的程序</strong>，要分别启动。就像 Meego 客户端和 Meego 服务器是两个独立的东西——两边都得跑起来，数据才能同步。</p>
 
-<p>在 VS Code 里开两个终端标签页：</p>
+<p>真实场景里，Meego 的服务器部署在云上，一直在跑，你不需要管它。今天我们在本地模拟这件事，所以需要自己把两边都启动起来。</p>
+
+<p>在 Cursor 里开两个终端标签页：</p>
 
 <table>
   <thead>
@@ -99,20 +127,24 @@
   <tbody>
     <tr>
       <td>终端 1</td>
-      <td>大厅（前端）</td>
+      <td>Meego 客户端（前端）</td>
       <td><code>cd lessons/lesson-4 && npm run dev</code></td>
       <td>localhost:5173</td>
     </tr>
     <tr>
       <td>终端 2</td>
-      <td>厨房（后端）</td>
+      <td>Meego 服务器（后端）</td>
       <td><code>cd lessons/lesson-4/server && npm run dev</code></td>
       <td>localhost:3001</td>
     </tr>
   </tbody>
 </table>
 
-<p>两个端口号不一样——5173 是大厅的门牌号，3001 是厨房的门牌号。它们通过 API 互相通信。</p>
+<p>两个端口号不一样——5173 是客户端的门牌号，3001 是服务器的门牌号。它们通过 API 互相通信。</p>
+
+<blockquote>
+  <p>这两个命令不需要记，让 AI 帮你跑就行。你只需要知道：前端起一个服务，后端起一个服务，两边都跑起来才能通信。</p>
+</blockquote>
 
 <!-- 4.4 -->
 <h2>4.4 API 长什么样</h2>
@@ -133,25 +165,25 @@
   <thead>
     <tr>
       <th>要素</th>
-      <th>点菜类比</th>
-      <th>例子</th>
+      <th>Meego 里的例子</th>
+      <th>代码里的例子</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <td><strong>路径（URL）</strong></td>
-      <td>你要的是哪道菜</td>
+      <td>你在操作哪个资源（Issue 列表）</td>
       <td><code>/api/issues</code></td>
     </tr>
     <tr>
       <td><strong>方法（Method）</strong></td>
-      <td>你要干嘛</td>
-      <td><code>GET</code>（看菜单）、<code>POST</code>（下新单）、<code>PUT</code>（改单）、<code>DELETE</code>（退菜）</td>
+      <td>你要做什么操作</td>
+      <td><code>GET</code>（查列表）、<code>POST</code>（新建）、<code>PUT</code>（改状态）、<code>DELETE</code>（删除）</td>
     </tr>
     <tr>
       <td><strong>数据（JSON）</strong></td>
-      <td>菜单上写的内容</td>
-      <td><code>{ "title": "...", "status": "..." }</code></td>
+      <td>改成什么状态（比如"已完成"）</td>
+      <td><code>{ "status": "已完成" }</code></td>
     </tr>
   </tbody>
 </table>
@@ -161,16 +193,18 @@
 <!-- 4.5 -->
 <h2>4.5 看代码：后端长什么样</h2>
 
-<p>打开 <code>server/index.ts</code>，整个文件做了三件事：<strong>开店、定菜单、开门</strong>。</p>
+<p>打开 <code>server/index.ts</code>，整个文件做了三件事：<strong>启动服务、定义 API、监听端口</strong>。</p>
 
-<h3>第一块：开店</h3>
+<h3>第一块：启动服务</h3>
 
 <pre><code>import express from "express";
 
 const app = express();
 app.use(express.json());</code></pre>
 
-<p>引入 Express（Node.js 最常用的后端框架，相当于"餐厅管理系统"），创建一个 app。<code>express.json()</code> 告诉它"前端发来 JSON 数据时帮我自动解析"。</p>
+<p>引入 Express。先说 Node.js——JavaScript 本来只能在浏览器里跑，Node.js 把它解放出来，让它能跑在服务器上。Express 是 Node.js 上最流行的后端框架，帮你管所有的 API。</p>
+
+<p>顺便说一下——后端用什么语言写很自由。Node.js 只是其中一种，Go、Java、Python 都可以写后端。比如我们公司非联的后端大部分就是用 Go 写的。今天用 Node.js 是因为你们已经会 JavaScript 了，换个语言逻辑是一模一样的。</p>
 
 <p>这几行是<strong>固定写法</strong>，不需要记。</p>
 
@@ -187,7 +221,7 @@ app.use(express.json());</code></pre>
 <p>多了一个 <code>id</code> 字段——每条 Issue 的<strong>身份证号</strong>。为什么不用 index？因为你删了第 2 条，后面每条的 index 都变了。id 不会因为删除或排序而改变。</p>
 
 <blockquote>
-  <p>数据存在 JavaScript 变量里，跑在服务器内存中。刷新页面不会丢（刷新只重新加载前端，后端的变量不受影响）。但服务器重启就没了——真实项目会用数据库，今天先用变量把流程跑通。</p>
+  <p>数据存在 JavaScript 变量里，跑在服务器内存中。刷新页面不会丢（刷新只重新加载前端，后端的变量不受影响）。但服务器重启就没了——数据库你可以理解为服务器的硬盘，内存里的东西断电就没了，但硬盘里的数据断电还在。真实项目会用数据库，今天先用变量把流程跑通。</p>
 </blockquote>
 
 <h3>第三块：API — 获取所有 Issue</h3>
@@ -204,7 +238,7 @@ app.get("/api/issues", (req, res) => {
  │    │         │                └── 收到请求后做什么（函数）
  │    │         └── 路径（就是浏览器地址栏输入的那个）
  │    └── 方法：GET = 拿数据
- └── 你的餐厅 app</pre>
+ └── Express 创建的服务器实例</pre>
 
 <p>翻译成人话：<strong>当有人用 GET 方法访问 /api/issues 时，把 issues 数组以 JSON 格式返回</strong>。</p>
 
@@ -217,6 +251,28 @@ app.get("/api/issues", (req, res) => {
 <p>三行代码，一个完整的 API。</p>
 
 <h3>第四块：API — 修改 Issue 状态</h3>
+
+<p>在看这段代码之前，先认识几个 JS 语法：</p>
+
+<div class="cheatsheet">
+  <h4>📋 JS 语法速查——看懂这段代码</h4>
+  <p><strong>① 对象是什么</strong><br>
+  对象就是一个有层级的信息包。比如字节跳动的组织架构：<br>
+  字节跳动 → 火山引擎 → 基础设施部门 → 负责人：张三<br>
+  代码里的 <code>req.params.id</code> 就是：<br>
+  req（这次请求）→ params（路径参数）→ id（具体的值）<br>
+  用 <code>.</code> 一层层往里取，就像顺着公司架构找到具体的人。</p>
+
+  <p><strong>② 数组是什么</strong><br>
+  数组就是一个有序列表。Meego 里的 Bug 列表就是数组——一条 Bug、两条 Bug、三条 Bug，按顺序排着。<br>
+  <code>issues.find(...)</code> 就是在列表里逐条找，找到满足条件的那条返回。</p>
+
+  <p><strong>③ 解构赋值</strong><br>
+  <code>const { status } = req.body</code><br>
+  等同于 <code>const status = req.body.status</code>，只是简写。</p>
+
+  <p>💡 看不懂的代码？选中它，Cursor 里按 <code>Cmd+L</code> 直接问。</p>
+</div>
 
 <pre><code>// PUT /api/issues/:id —— 修改一个 Issue 的状态
 app.put("/api/issues/:id", (req, res) => {
@@ -237,25 +293,23 @@ app.put("/api/issues/:id", (req, res) => {
 
 <ol>
   <li><code>app.put</code> — PUT 方法，表示"修改数据"</li>
-  <li><code>"/api/issues/:id"</code> — <code>:id</code> 是占位符。请求 <code>/api/issues/3</code> 时，<code>req.params.id</code> 就是 <code>3</code>。就像跟服务员说"3 号桌"</li>
+  <li><code>"/api/issues/:id"</code> — <code>:id</code> 是占位符。请求 <code>/api/issues/3</code> 时，<code>req.params.id</code> 就是 <code>3</code></li>
   <li><code>req.body</code> — 前端发过来的数据（"要改成什么状态"）</li>
   <li><code>issues.find(...)</code> — 在数组里找到对应的那条 Issue</li>
   <li>找不到就返回 404（"找不到"）——第 1 课讲的，4 开头是"你的问题"</li>
   <li>找到了就改 status，把改完的结果返回</li>
 </ol>
 
-<p>餐厅类比：你跟服务员说"3 号桌那道菜改成微辣"——服务员找到单子，改好，回来说"好了"。</p>
-
-<h3>第五块：开门营业</h3>
+<h3>第五块：监听端口</h3>
 
 <pre><code>app.listen(3001, () => {
   console.log("后端跑在 http://localhost:3001");
 });</code></pre>
 
-<p>让服务器开始监听 3001 端口——厨房的门牌号是 3001，前端通过这个门牌号来找后端。</p>
+<p>让服务器开始监听 3001 端口——3001 是服务器的门牌号，前端通过这个门牌号来找后端。</p>
 
 <blockquote>
-  <p><strong>总结</strong>：整个后端代码就三件事——开店（创建 app）、定菜单（写 API）、开门（监听端口）。后端比前端简单，它不管页面长什么样，只管"你要什么数据，我给你什么数据"。</p>
+  <p><strong>总结</strong>：整个后端代码就三件事——启动服务（创建 app）、定义 API（写 GET/PUT）、监听端口（开始接收请求）。后端比前端简单，它不管页面长什么样，只管"你要什么数据，我给你什么数据"。</p>
 </blockquote>
 
 <!-- 4.6 -->
@@ -310,7 +364,7 @@ useEffect(() => {
 <p><strong>fetch 就是前端调 API 的方式</strong>——之前你在浏览器地址栏手动输入 URL，现在代码自动做了。</p>
 
 <blockquote>
-  <p><strong>关于地址</strong>：代码里写 <code>fetch("/api/issues")</code>，不是 <code>fetch("http://localhost:3001/api/issues")</code>。因为项目配了一个转发规则（Vite 代理）——前端看到 <code>/api</code> 开头的请求，自动转发到后端 3001 端口。就像大厅有个内部通道直通厨房，不用出门绕后门。</p>
+  <p><strong>关于地址</strong>：代码里写 <code>fetch("/api/issues")</code>，不是 <code>fetch("http://localhost:3001/api/issues")</code>。因为项目配了一个转发规则（Vite 代理）——前端看到 <code>/api</code> 开头的请求，自动转发到后端 3001 端口。知道有这个东西就行，不需要深究。</p>
 </blockquote>
 
 <p>打开 Network 面板验证：能看到 <code>/api/issues</code> 请求，GET 方法，状态 200。</p>
@@ -356,57 +410,9 @@ onChangeStatus={(newStatus) => {
 </blockquote>
 
 <!-- 4.7 -->
-<h2>4.7 动手：补全"新增 Issue"的 API</h2>
+<h2>4.7 新增 Issue 的 API</h2>
 
-<p>拿数据和改状态都有了，还缺<strong>添加新 Issue</strong>。下面是骨架代码，把 <code>________</code> 填上：</p>
-
-<pre><code>// POST /api/issues —— 新增一个 Issue
-app.post("/api/issues", (req, res) => {
-  // 第 1 步：从前端发来的数据里取出 label、title、assignee
-  const { label, title, assignee } = ________;
-
-  // 第 2 步：组装一条新 Issue
-  const newIssue = {
-    id: issues.________ + 1,
-    label,
-    title,
-    assignee,
-    status: "________",
-  };
-
-  // 第 3 步：加到数组里
-  issues.________(newIssue);
-
-  // 第 4 步：返回给前端
-  res.________(newIssue);
-});</code></pre>
-
-<h3>提示</h3>
-
-<ul>
-  <li>第 1 步：前端发来的数据存在哪个对象里？（PUT 那个 API 里用过）</li>
-  <li>第 2 步：数组有几个元素用什么属性？新 Issue 默认什么状态？</li>
-  <li>第 3 步：往数组末尾加元素的方法？</li>
-  <li>第 4 步：后端返回 JSON 用什么方法？（GET 那个 API 里用过）</li>
-</ul>
-
-<h3>验证</h3>
-
-<p>打开浏览器 DevTools → Console 面板，粘贴以下代码：</p>
-
-<pre><code>fetch("/api/issues", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    label: "需求",
-    title: "加一个搜索功能",
-    assignee: "小红"
-  })
-}).then(r => r.json()).then(console.log)</code></pre>
-
-<p>成功的话 Console 会打印出新 Issue 的数据。刷新页面，看新卡片有没有出现。</p>
-
-<h3>答案</h3>
+<p>拿数据和改状态都有了，还缺<strong>添加新 Issue</strong>。完整代码如下：</p>
 
 <pre><code>app.post("/api/issues", (req, res) => {
   const { label, title, assignee } = req.body;        // 前端发来的数据
@@ -422,6 +428,8 @@ app.post("/api/issues", (req, res) => {
   issues.push(newIssue);                                // 加到数组末尾
   res.json(newIssue);                                   // 返回 JSON
 });</code></pre>
+
+<p>跟 GET 和 PUT 的结构一模一样：<code>app.方法(路径, 处理函数)</code>。区别是 POST 要从 <code>req.body</code> 里取前端发来的数据，组装好之后 <code>push</code> 进数组，再返回。</p>
 
 <!-- 4.8 -->
 <h2>4.8 总结</h2>
@@ -459,8 +467,8 @@ app.post("/api/issues", (req, res) => {
 ═══════════════════════════
 
 常见 API 方法：
-  GET    → 拿数据    → app.get("/路径", (req, res) => { ... })
-  POST   → 加数据    → app.post("/路径", (req, res) => { ... })
+  GET    → 查数据    → app.get("/路径", (req, res) => { ... })
+  POST   → 新建数据  → app.post("/路径", (req, res) => { ... })
   PUT    → 改数据    → app.put("/路径", (req, res) => { ... })
   DELETE → 删数据    → app.delete("/路径", (req, res) => { ... })
 
@@ -483,35 +491,41 @@ app.post("/api/issues", (req, res) => {
 <!-- 4.9 -->
 <h2>4.9 课后作业</h2>
 
+<blockquote>
+  <p><strong>关于用 AI</strong>：这次作业鼓励用 AI 帮你写代码。但在让 AI 写之前，先用自己的话描述清楚你要做什么——能说清楚，说明你真的理解了。AI 给了代码之后，对照今天的速查卡看懂每一行再提交。</p>
+</blockquote>
+
 <div class="task-list">
   <h4>基础作业（必做）</h4>
   <ol>
     <li>
-      <strong>后端</strong>：加一个 DELETE API — <code>DELETE /api/issues/:id</code>，从数组里删除指定 Issue。骨架代码：
-      <pre><code>app.delete("/api/issues/:id", (req, res) => {
-  const id = Number(req.params.________);
-  const index = issues.findIndex(item => item.id === ________);
-  if (index === -1) {
-    res.status(404).json({ error: "Issue 不存在" });
-    return;
-  }
-  issues.splice(________, 1);   // splice(位置, 删几个)
-  res.json({ success: true });
-});</code></pre>
+      <strong>后端</strong>：加一个 DELETE API — <code>DELETE /api/issues/:id</code>，从数组里删除指定 Issue
     </li>
     <li><strong>前端</strong>：在每张卡片上加一个"删除"按钮，点击后调 DELETE API，成功后重新 fetch 列表刷新页面</li>
-    <li><strong>截图</strong>：打开 Network 面板，证明 DELETE 请求成功（能看到请求 + 状态 200 + 刷新后 Issue 消失了）</li>
   </ol>
 
   <h4>加分作业</h4>
   <ol>
     <li>在前端加一个简单的表单（标题输入框 + 添加按钮），调用课上写的 POST API 来新增 Issue</li>
   </ol>
+
+  <h4>提交内容（三件事）</h4>
+  <ol>
+    <li><strong>你给 AI 的提示词</strong>——截图或粘贴文字。描述越清楚，说明理解越深</li>
+    <li><strong>AI 给你的代码</strong>——粘贴到作业文件里</li>
+    <li><strong>运行结果截图</strong>——Network 面板，能看到 DELETE 请求 + 状态 200 + 刷新后 Issue 消失了</li>
+  </ol>
 </div>
 
 <h3>下节预告</h3>
 
 <p>下节课是最后一课——<strong>调试 + 部署</strong>。你的项目出了 bug 怎么排查？报错信息怎么读？以及怎么把项目部署到网上，让别人也能访问。</p>
+
+<div class="cheatsheet">
+  <h4>📝 课后反馈 & 许愿单</h4>
+  <p>有没有没听懂的地方？还想学什么？花 1 分钟告诉我们：</p>
+  <p><a href="https://my.feishu.cn/share/base/form/shrcn5xsaEfT8NnfJUzNyS55i0c" target="_blank">👉 填写反馈</a></p>
+</div>
 
 <div class="footer">
   <p>编程入门课程 &copy; 2026</p>
