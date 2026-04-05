@@ -8,7 +8,7 @@ app.use(express.json());
 // ============================================================
 
 const issues = [
-  { id: 1, label: "Bug", title: "首页加载速度太慢", assignee: "小明", status: "进行中" },
+  { id: 1, label: "Bug", title: "首页加载速度太慢", assignee: "张三", status: "进行中" },
   { id: 2, label: "Bug", title: "登录功能异常", assignee: "小明", status: "待处理" },
   { id: 3, label: "Bug", title: "注册功能异常", assignee: "小明", status: "进行中" },
   { id: 4, label: "Bug", title: "忘记密码功能异常", assignee: "小明", status: "待处理" },
@@ -23,6 +23,8 @@ const issues = [
 app.get("/api/issues", (req, res) => {
   res.json(issues);
 });
+
+// 请求 put request /api/issues/1 ，body 是 { status: "已完成" }, 
 
 // PUT /api/issues/:id —— 修改一个 Issue 的状态
 app.put("/api/issues/:id", (req, res) => {
@@ -44,25 +46,36 @@ app.put("/api/issues/:id", (req, res) => {
 // ============================================================
 
 // POST /api/issues —— 新增一个 Issue
-// app.post("/api/issues", (req, res) => {
-//   // 第 1 步：从前端发来的数据里取出 label、title、assignee
-//   const { label, title, assignee } = ________;
-//
-//   // 第 2 步：组装一条新 Issue
-//   const newIssue = {
-//     id: issues.________ + 1,
-//     label,
-//     title,
-//     assignee,
-//     status: "________",
-//   };
-//
-//   // 第 3 步：加到数组里
-//   issues.________(newIssue);
-//
-//   // 第 4 步：返回给前端
-//   res.________(newIssue);
-// });
+app.post("/api/issues", (req, res) => {
+  // 第 1 步：从前端发来的数据里取出 label、title、assignee
+  const { label, title, assignee } = req.body;
+
+  // 第 2 步：组装一条新 Issue
+  const newIssue = {
+    id: issues.length + 1,
+    label,
+    title,
+    assignee,
+    status: "待处理",
+  };
+
+  // 第 3 步：加到数组里
+  issues.push(newIssue);
+
+  // 第 4 步：返回给前端
+  res.json(newIssue);
+});
+
+app.delete('/api/issues/:id', (req, res) => {
+  const id = Number(req.params.id);
+  const issue = issues.find((item) => item.id === id);
+  if (!issue) {
+    res.status(404).json({ error: "Issue 不存在" });
+    return;
+  }
+  issues.splice(issues.indexOf(issue), 1);
+  res.json(issue);
+});
 
 // ============================================================
 // 启动服务器
