@@ -1,13 +1,18 @@
-// Vercel Serverless Function 版本（带数据库）
+// Vercel Serverless Function 版本（带 Redis 数据库）
 // 部署到 Vercel 时，这个文件自动变成 /api/issues 接口
-// 用 Vercel KV（Redis）存数据，改了状态刷新不会丢
+// 用 Upstash Redis 存数据，改了状态刷新不会丢
 
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { kv } from "@vercel/kv";
+import { Redis } from "@upstash/redis";
 
 // ============================================================
-// 默认数据（第一次访问时写入数据库）
+// Redis 连接
 // ============================================================
+
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL!,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+});
 
 const defaultIssues = [
   { id: 1, label: "Bug", title: "首页加载速度太慢", assignee: "小明", status: "进行中" },
@@ -25,14 +30,17 @@ type Issue = {
   status: string;
 };
 
-// 从数据库读 issues，如果没有就用默认数据初始化
 async function getIssues(): Promise<Issue[]> {
-  const issues = await kv.get<Issue[]>("issues");
+  const issues = await redis.get<Issue[]>("issues");
   if (!issues) {
-    await kv.set("issues", defaultIssues);
+    await redis.set("issues", defaultIssues);
     return defaultIssues;
   }
   return issues;
+}
+
+async function saveIssues(issues: Issue[]) {
+  await redis.set("issues", issues);
 }
 
 // ============================================================
@@ -59,7 +67,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     issue.status = status;
-    await kv.set("issues", issues);
+    await saveIssues(issues);
     return res.json(issue);
   }
 
@@ -75,7 +83,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       status: "待处理",
     };
     issues.push(newIssue);
-    await kv.set("issues", issues);
+    await saveIssues(issues);
     return res.json(newIssue);
   }
 

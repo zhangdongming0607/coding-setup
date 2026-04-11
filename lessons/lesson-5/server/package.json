@@ -7,7 +7,10 @@
     "dev": "tsx watch index.ts"
   },
   "dependencies": {
-    "express": "^4.21.0"
+    "@upstash/redis": "^1.37.0",
+    "dotenv": "^17.4.1",
+    "express": "^4.21.0",
+    "ioredis": "^5.10.1"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",
