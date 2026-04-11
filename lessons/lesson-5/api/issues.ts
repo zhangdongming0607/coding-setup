@@ -56,8 +56,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   // PUT /api/issues/:id —— 修改状态
   if (req.method === "PUT") {
-    const parts = req.url?.split("/") ?? [];
-    const id = Number(parts[parts.length - 1]);
+    const id = Number(req.query.id);
     const { status } = req.body;
 
     const issues = await getIssues();
