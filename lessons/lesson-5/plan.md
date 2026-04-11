@@ -398,22 +398,21 @@ git push
 
 #### 第三步：加数据库（3 分钟）
 
-**构建完成后，在 Vercel 项目控制台操作**：
+**课前已准备好**：在 Upstash（upstash.com）上创建了一个免费 Redis 数据库，拿到了 `UPSTASH_REDIS_REST_URL` 和 `UPSTASH_REDIS_REST_TOKEN`。
 
-1. 点左侧 "Storage" 标签
-2. "Create Database" → 选 **KV**（Upstash Redis）
-3. 选免费方案，确认创建
-4. 创建完成后，Vercel 会**自动把连接信息（环境变量）注入到项目里**
+**在 Vercel 项目控制台操作**：
+
+1. 点左侧 "Settings" → "Environment Variables"
+2. 添加两个变量：`UPSTASH_REDIS_REST_URL` 和 `UPSTASH_REDIS_REST_TOKEN`
+3. 三个环境（Production / Preview / Development）都勾上
 
 **话术**：
 
 > 部署成功了，但数据还没有地方存。我们加一个数据库。
 >
-> 在 Vercel 控制台点 Storage → 创建一个 KV 数据库。KV 的意思是 Key-Value，就是一个"钥匙-柜子"的储物系统——你用一个名字（key）存数据进去，下次用同一个名字就能取出来。
+> 我提前在 Upstash 上创建了一个免费的 Redis 数据库。Redis 是什么？你可以理解为一个云上的"储物柜"——你用一个名字存数据进去，下次用同一个名字就能取出来。
 >
-> 选免费方案——个人项目完全够用。
->
-> 创建完成。注意看，Vercel **自动帮你把数据库的连接信息配好了**——你不需要手动填密码之类的东西。
+> 现在把数据库的连接信息告诉 Vercel——在 Settings 里加两个环境变量，一个是地址，一个是密码。
 
 #### 第四步：重新部署让数据库生效（2 分钟）
 
@@ -425,7 +424,7 @@ git push
 
 **话术**：
 
-> 数据库加好了，但刚才部署的版本还不知道有数据库。重新部署一次，让它读到新的配置。
+> 环境变量加好了，重新部署一次，让代码读到数据库的配置。
 >
 > 点 Redeploy——等 1 分钟。
 
@@ -602,6 +601,8 @@ Vercel 部署步骤：
 | `npm run build` 构建成功 | ☐ |
 | Vercel 账号已登录，GitHub 仓库已关联 | ☐ |
 | **提前在 Vercel 上部署成功，备用 URL 可用** | ☐ |
+| **Upstash Redis 数据库已创建**，`UPSTASH_REDIS_REST_URL` 和 `UPSTASH_REDIS_REST_TOKEN` 已加到 Vercel 环境变量 | ☐ |
+| 本地 `.env.local` 有 Upstash 凭据，`server/index.ts` 能连上 Redis | ☐ |
 | 速查卡文本已写好 | ☐ |
 | 两个终端标签页准备好（前端 + 后端） | ☐ |
 | 录屏工具已准备 | ☐ |
